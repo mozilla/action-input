@@ -1,4 +1,4 @@
-# XR Input
+# Mozilla XR Input
 
 A framework-agnostic input library that progressively handles flat, portal, and immersive web apps.
 
@@ -18,16 +18,16 @@ This project contains three Javascript libraries and one UI element:
 
 ## Actions library
 
-This library provides the API that most web apps will use to poll for current actions and to receive action events. The actions themselves come from a set of ActionProviders, such as one provided by the Input library and one that wraps the proposed WebXR input API.
+This library provides the API that most web apps will use to poll for current actions and to receive action events. The actions themselves come from a set of `ActionProvider`s, such as one provided by the Input library and one that wraps the proposed WebXR input API.
 
 ### Features
 
 - Exposes a polling and event API that web apps use to track actions
-- Exposes an API to add and remove ActionProviders
+- Exposes an API to add and remove `ActionProvider`s
 
 ## Input library
 
-This library maps low level hardware inputs to action events, either directly from hardware events or via filters. It provides an ActionProvider for use by the Actions library. It uses the Hardware library to decorate action events with information about the hardware that caused the action.
+This library maps low level hardware inputs to action events, either directly from hardware events or via filters. It provides an `ActionProvider` for use by the Actions library. It uses the Hardware library to decorate action events with information about the hardware that caused the action.
 
 ### Features
 
