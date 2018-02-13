@@ -1,3 +1,7 @@
+# Built files
+dist/*
+docs/*
+
 # Logs
 logs
 *.log
