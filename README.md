@@ -14,7 +14,25 @@ Provide default input maps for existing hardware and regularly release new maps 
 
 Provide users with the ability to create their own input configurations to enable apps to support users preferences and accessibility needs.
 
-This project contains three Javascript libraries and one UI element:
+## Install and build
+
+From the root of the project:
+
+	npm install 			# download and install dependencies
+	npm run-script build	# compile the JS and data files into the `dist` directory
+
+	npm run-script docs		# compile the API reference documentation into the `docs` directory
+	open docs/index.html	# show the API reference documentation in your browser
+
+## Testing
+
+Tests are in `src/test/index.html`. To run the tests, open this file in a browser:
+
+	open src/test/index.html 	# look in the JavaScript console for test results
+
+## Usage
+
+TBD
 
 ## Actions library
 
