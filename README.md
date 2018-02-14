@@ -28,7 +28,7 @@ From the root of the project:
 
 Tests are in `src/test/index.html`. To run the tests, open this file in a browser:
 
-	open src/test/index.html 	# look in the JavaScript console for test results
+	open src/test/index.html
 
 ## Usage
 

@@ -1,57 +1,22 @@
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>Tests</title>
-	</head>
-	<body>
-		<h1>tests</h1>
-		<p>(see javascript console for results)</p>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <link href="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="mocha"></div>
 
-		<script type="module">
-			import Test from './Test.js'
-			import SynchronousFetchMap from './SynchronousFetchMap.js'
+  <script src="chai.js"></script>
+  <script src="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.js"></script>
 
-			import KeyboardInputSource from '../input/KeyboardInputSource.js'
-
-			function runTests(){
-				let tests = []
-
-				tests.push(new Test("Keyboard input", (test) => {
-					let receivedEvents = []
-					var listener = (eventName, inputEvent, ...params) => {
-						receivedEvents.push({ eventName: eventName, inputEvent: inputEvent, params: params })
-					}
-
-					let keyboardInputSource = new KeyboardInputSource()
-					keyboardInputSource.addListener(listener, 'input-event')
-
-					let testInput = function(eventName, keyCode, alt=false, ctrl=false, shift=false, meta=false){
-						keyboardInputSource.handleKeyboardEvent(new KeyboardEvent(eventName, {
-							keyCode: keyCode,
-							altKey: alt,
-							ctrlKey: ctrl,
-							shiftKey: shift,
-							metaKey: meta
-						}))
-						test.assertEqual(eventName, receivedEvents[receivedEvents.length - 1].inputEvent.name)
-						test.assertEqual(keyCode, receivedEvents[receivedEvents.length - 1].params[1])
-						test.assertEqual(alt, receivedEvents[receivedEvents.length - 1].params[2])
-						test.assertEqual(ctrl, receivedEvents[receivedEvents.length - 1].params[3])
-						test.assertEqual(shift, receivedEvents[receivedEvents.length - 1].params[4])
-						test.assertEqual(meta, receivedEvents[receivedEvents.length - 1].params[5])
-					}
-
-					testInput('keydown', 65, true, false, false, false)
-					testInput('keydown', 66, false, true, false, false)
-					testInput('keydown', 67, false, false, true, false)
-					testInput('keydown', 68, false, false, false, true)
-				}))
-
-				Test.runAndLog(tests)
-			}
-
-			window.addEventListener('DOMContentLoaded', runTests)
-		</script>
-
-	</body>
+  <script type="module">mocha.setup('bdd')</script>
+  <script type="module" src="test.inputsource.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+        mocha.checkLeaks();
+        mocha.run();
+    })
+  </script>
+</body>
 </html>
