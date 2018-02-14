@@ -19,9 +19,6 @@
   "bugs": {
     "url": "https://github.com/mozilla/xr-input/issues"
   },
-  "prettier": {
-    "singleQuote": true
-  },
   "homepage": "https://github.com/mozilla/xr-input#readme",
   "devDependencies": {
     "babel-core": "^6.26.0",
