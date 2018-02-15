@@ -1,5 +1,4 @@
 /**
- * Device represents a piece of input hardware, like a keyboard or a Vive controller. 
+ * Device represents a piece of input hardware, like a keyboard or a Vive controller.
  */
-export default class Device {
-}
+export default class Device {}
