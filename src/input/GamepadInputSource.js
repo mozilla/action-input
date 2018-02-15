@@ -1,4 +1,4 @@
-import "../action/InputSource.js";
+import InputSource from "../action/InputSource.js";
 
 /**
  *	GamepadInputSource watches the gamepad API and generates {@link InputEvent}s.
