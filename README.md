@@ -14,7 +14,19 @@ Provide default input maps for existing hardware and regularly release new maps 
 
 Provide users with the ability to create their own input configurations to enable apps to support users preferences and accessibility needs.
 
-This project contains three Javascript libraries and one UI element:
+## Install and build
+
+From the root of the project:
+
+    npm install 			# download and install dependencies
+    npm run-script build	# compile the JS and data files into the `dist` directory
+
+    npm run-script docs		# compile the API reference documentation into the `docs` directory
+    open docs/index.html	# show the API reference documentation in your browser
+
+## Usage
+
+TBD
 
 ## Actions library
 
@@ -22,8 +34,8 @@ This library provides the API that most web apps will use to poll for current ac
 
 ### Features
 
-- Exposes a polling and event API that web apps use to track actions
-- Exposes an API to add and remove `ActionProvider`s
+* Exposes a polling and event API that web apps use to track actions
+* Exposes an API to add and remove `ActionProvider`s
 
 ## Input library
 
@@ -31,11 +43,11 @@ This library maps low level hardware inputs to action events, either directly fr
 
 ### Features
 
-- Loads and serializes JSON action maps that declare mappings from hardware input to action events and/or filters
-- Loads filters that receive hardware input and emit action events 
-- Exposes API for activating and deactivating action maps
-- Exposes API for querying what action[s] each hardware input (button, touchpad, key, touch event, etc) will currently trigger
-- Provides example action maps and toggling code
+* Loads and serializes JSON action maps that declare mappings from hardware input to action events and/or filters
+* Loads filters that receive hardware input and emit action events
+* Exposes API for activating and deactivating action maps
+* Exposes API for querying what action[s] each hardware input (button, touchpad, key, touch event, etc) will currently trigger
+* Provides example action maps and toggling code
 
 ## Hardware library
 
@@ -43,17 +55,17 @@ This library provides glTF models, positional metadata, and reference images for
 
 ### Supported hardware
 
-- Keyboards: virtual?
-- Mice
-- Touch-screens: phones, tablets
-- Tracked wands: Vive, Touch, Windows MR, GearVR controller, Daydream controller, Knuckles
-- Gamepads: XBox
-- GearVR touchpad
-- Stylus
+* Keyboards: virtual?
+* Mice
+* Touch-screens: phones, tablets
+* Tracked wands: Vive, Touch, Windows MR, GearVR controller, Daydream controller, Knuckles
+* Gamepads: XBox
+* GearVR touchpad
+* Stylus
 
 ### Features
 
-- Exposes a polling and event API for detected hardware
+* Exposes a polling and event API for detected hardware
 
 ## Recording and playback library
 
@@ -61,10 +73,10 @@ This library provides web apps with the ability to record and serialize time-lin
 
 ### Features
 
-- Provides API to start, stop, and serialize recordings by attaching to the Actions library
-- Provides API to load and play recordings by attaching to the Actions library
+* Provides API to start, stop, and serialize recordings by attaching to the Actions library
+* Provides API to load and play recordings by attaching to the Actions library
 
 ## Action map editor UI
 
-This library provides a user facing UI for editing action maps used by the Input library. It uses the Input library and the Hardware library to present the user with device and app specific configuration UI. 
+This library provides a user facing UI for editing action maps used by the Input library. It uses the Input library and the Hardware library to present the user with device and app specific configuration UI.
 This editor should make it possible to create (and share?) per-web-app action maps in order to enable accessibility for people using non-standard hardware.

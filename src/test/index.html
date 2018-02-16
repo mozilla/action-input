@@ -1,0 +1,24 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <link href="mocha.css" rel="stylesheet" />
+</head>
+<body>
+  <div id="mocha"></div>
+
+  <script src="chai.js"></script>
+  <script src="mocha.js"></script>
+
+  <script type="module">
+    mocha.setup('bdd')
+  </script>
+  <script type="module" src="test.inputsource.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      mocha.checkLeaks();
+      mocha.run();
+    })
+  </script>
+</body>
+</html>
