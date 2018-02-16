@@ -16,7 +16,6 @@
     "url": "git+https://github.com/mozilla/xr-input.git"
   },
   "author": "Mozilla",
-  "license": "",
   "bugs": {
     "url": "https://github.com/mozilla/xr-input/issues"
   },
