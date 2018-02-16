@@ -9,6 +9,7 @@
     "build": "webpack",
     "docs": "./node_modules/.bin/esdoc",
     "precommit": "pretty-quick --staged",
+    "lint": "eslint src",
     "prettier": "prettier --write src/**/*.js"
   },
   "repository": {
