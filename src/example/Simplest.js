@@ -69,14 +69,20 @@ function calledDuringSetup() {
   actionManager.isActive("/action/jump"); // returns bool
 
   // Or, if the app needs to poll for action-specific info:
-  actionManager.get("/action/jump");
+  let jumpActionInfo = actionManager.get("/action/jump");
   /*
     returns
     {
       action: Action,
       active: bool,
+      sources: [Device, ...],
       isDoubleJump: bool,
       other action specific params...
     }
   */
+
+  // Send some haptic feedback through the hw sources of the active Action
+  if (jumpActionInfo.active) {
+    jumpActionInfo.action.sendHapticPulse(pulseMilliseconds, jumpActionInfo.sources);
+  }
 }
