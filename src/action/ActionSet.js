@@ -42,7 +42,7 @@ export default class ActionSet {
   /**
    * called by the ActionManager when it receives {@link InputEvent}s from {@link InputSource}s.
    */
-  handleInput(inputPath, value, inputSource, params) {
-    this._actionMap.handleInput(inputPath, value, inputSource, params);
+  handleInput(inputPath, active, inputSource, inputParameters) {
+    this._actionMap.handleInput(inputPath, active, inputSource, inputParameters);
   }
 }

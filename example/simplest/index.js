@@ -7,14 +7,17 @@ export default function initInput() {
   // Switch to the action set that handles play situations for flat displays
   actionManager.switchToActionSet("/action-set/flat-playing");
 
-  // The app can listen for events for a single Action
-  actionManager.addActionListener("/action/move", (actionPath, active, actionParameters) => {
-    console.log("move event", actionPath, active, actionParameters);
-    //event.action.sendHapticPulse(pulseMilliseconds, jumpActionInfo.sources);
+  // The app can listen for a single action
+  actionManager.addActionListener("/action/move", (actionPath, active, actionParameters, inputSource) => {
+    console.log("move event", actionPath, active, actionParameters, inputSource);
+    if (active) inputSource.sendHapticPulse(300);
+  });
+  actionManager.addActionListener("/action/rotate", (actionPath, active, actionParameters, inputSource) => {
+    console.log("rotate event", actionPath, active, actionParameters, inputSource);
   });
 
   // The app can list for events using semantic path wildcards
-  actionManager.addActionListener("/action/menu/*", (event, ...params) => {
+  actionManager.addActionListener("/action/menu/*", (actionPath, active, actionParameters, inputSource) => {
     console.log("Menu action event", event, ...params);
   });
 

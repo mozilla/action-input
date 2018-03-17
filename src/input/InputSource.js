@@ -1,5 +1,5 @@
 /**
- *	InputSource emits {@link InputEvent}s for mapping into {@link Action}s by the {@link ActionMapper}
+ *  InputSource emits {@link InputEvent}s for mapping into {@link Action}s by the {@link ActionMapper}
  *
  */
 export default class InputSource {
@@ -13,5 +13,9 @@ export default class InputSource {
   }
   addListener(listener) {
     this._listeners.add(listener);
+  }
+
+  sendHapticPulse(pulseMilliseconds) {
+    // InputSources should override if they have haptic capabilities
   }
 }

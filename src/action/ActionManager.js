@@ -225,13 +225,13 @@ export default class ActionManager {
         return; // Changing an already existing action does not trigger an event
       }
       this._activeActionInfos.set(actionPath, actionParameters);
-      this._notifyListeners(actionPath, true, actionParameters);
+      this._notifyListeners(actionPath, true, actionParameters, inputSource);
     } else {
       if (this._activeActionInfos.has(actionPath) === false) {
         return; // Action is not active, so no new event
       }
       this._activeActionInfos.delete(actionPath);
-      this._notifyListeners(actionPath, false, actionParameters);
+      this._notifyListeners(actionPath, false, actionParameters, inputSource);
     }
 
     // TODO Notify local action listeners
@@ -262,11 +262,11 @@ export default class ActionManager {
     return listenerSet.delete(listener);
   }
 
-  _notifyListeners(actionPath, active, actionParameters) {
+  _notifyListeners(actionPath, active, actionParameters, inputSource) {
     this._actionListeners.forEach((listenerSet, listenerPath) => {
       if (this._pathsMatch(actionPath, listenerPath) === false) return;
       listenerSet.forEach(listener => {
-        listener(actionPath, active, actionParameters);
+        listener(actionPath, active, actionParameters, inputSource);
       });
     });
   }

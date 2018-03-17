@@ -1,22 +1,5 @@
 {
   "comment": "Flat Playing",
-  "actions": [
-    {
-      "name": "/action/jump",
-      "type": "boolean"
-    },
-    {
-      "name": "/action/move",
-      "type": "vector2"
-    }
-  ],
-  "localizations": [
-    {
-      "language": "en",
-      "/action/jump": "Jump",
-      "/action/move": "Move"
-    }
-  ],
   "filters": [
     {
       "filter": "/filter/reverse-active",
