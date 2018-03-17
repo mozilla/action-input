@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-  entry: ["babel-polyfill", "./src/Temp.js"],
+  entry: ["babel-polyfill", "./src/action/ActionManager.js"],
   output: {
     filename: "xr-input.js",
     path: path.resolve(__dirname, "dist")

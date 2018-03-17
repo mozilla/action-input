@@ -1,5 +1,4 @@
-import ActionManager from "../action/ActionManager.js";
-import DoubleJumpFilter from "./filters/DoubleJumpFilter.js";
+import ActionManager from "../../action/ActionManager.js";
 
 /*
 This is some pseudocode of the kind of app-specific setup of the ActionManager
