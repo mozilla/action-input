@@ -15,7 +15,7 @@ export default class Filter {
    *
    * @return {Array} [value, actionParameters]
    */
-  filter(inputPath, value, inputParameters, filterPath, filterParameters) {
+  filter(inputPath, active, inputParameters, filterPath, filterParameters) {
     throw new Error("Extending classes must override the filter method");
   }
 }

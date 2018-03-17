@@ -1,5 +1,4 @@
 import Type from "./Type.js";
-import Action from "./Action.js";
 import ActionSet from "./ActionSet.js";
 import ActionMap from "./ActionMap.js";
 
@@ -127,7 +126,7 @@ export default class ActionManager {
   }
 
   /**
-   * @param {string} a single element in the semantic path for the input source, like 'keyboard' for a KeyboardInputSource
+   * @param {string} inputPathName a single element in the semantic path for the input source, like 'keyboard' for a KeyboardInputSource
    * @param {InputSource} inputSource
    */
   addInputSource(inputPathName, inputSource) {
@@ -155,8 +154,8 @@ export default class ActionManager {
   /**
    * Add a path alias for an semantic input path, usually creating a more abstract alias for a specific input.
    * For example, one might alias `/input/vive/controller/left/button/0` to `/input/hand/left/finger/0`
-   * @param {string} a full semantic path for the input source
-   * @param {string} the alias for the inputPath
+   * @param {string} inputPath a full semantic path for the input source
+   * @param {string} aliasPath the alias for the inputPath
    */
   aliasInputPath(inputPath, aliasPath) {
     throw new Error("Not implemented");

@@ -48,7 +48,7 @@ export default class ActionMap {
   }
 
   /**
-   * @param Object data (probably parsed from JSON by loadURL) used to bind inputs to actions and filters
+   * @param {Object} data (probably parsed from JSON by loadURL) used to bind inputs to actions and filters
    */
   loadData(data) {
     return new Promise((resolve, reject) => {
@@ -67,9 +67,9 @@ export default class ActionMap {
    *
    * @param {string} inputPath a full semantic path to an input like '/input/hand/finger/0/touch'
    * @param {string} actionPath a full semantic path to an action like '/action/jump'
-   * @param {Object} parameters to emit with the action
+   * @param {Object} actionParameters to emit with the action
    * @param {string} filterPath a full semantic path to a {@link Filter} like '/filter/reverse-axis'
-   * @param {Object} parameters to feed the filter during filtering
+   * @param {Object} filterParameters to feed the filter during filtering
    */
   bind(inputPath, actionPath, actionParameters = null, filterPath = null, filterParameters = null) {
     let pathInfos = this._bindings.get(inputPath);
@@ -107,8 +107,8 @@ export default class ActionMap {
    *
    * @param {string} inputPath a full semantic path for an {@link InputEvent} like '/input/hand/finger/0/touch'
    * @param {bool} active
-   * @param {@link InputSource} the input source that led to the event
-   * @param {Object} params zero or more event-specific parameters that give the event more context
+   * @param {InputSource} inputSource the input source that led to the event
+   * @param {Object} inputParameters zero or more event-specific parameters that give the event more context
    */
   handleInput(inputPath, active, inputSource, inputParameters) {
     let bindingSet = this._bindings.get(inputPath);
