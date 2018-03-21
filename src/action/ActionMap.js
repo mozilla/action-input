@@ -1,5 +1,5 @@
 /**
- *	ActionMap maps input semantic paths to {@link Action}s and/or {@link Filter}s.
+ *  ActionMap maps input semantic paths to {@link Action}s and/or {@link Filter}s.
  *
  */
 export default class ActionMap {
@@ -121,7 +121,7 @@ export default class ActionMap {
         this._notifyListeners(
           info.action,
           active,
-          Object.assign({}, inputParameters, info.actionParameters),
+          Object.assign({}, info.actionParameters, inputParameters),
           inputSource
         );
         return;
@@ -136,7 +136,7 @@ export default class ActionMap {
           this._notifyListeners(
             info.action,
             results[0],
-            Object.assign(results[1], inputParameters, info.actionParameters),
+            Object.assign({}, inputParameters, info.actionParameters, results[1]),
             inputSource
           );
         }
