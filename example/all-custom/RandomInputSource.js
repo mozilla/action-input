@@ -29,4 +29,17 @@ export default class RandomInputSource extends InputSource {
       this.notifyListeners(inputInfo.path, false, inputInfo.parameters);
     }, 500);
   }
+
+  /**
+  @param partialPath {string} the relative semantic path for an input
+  @return the value of the the input, or null if the path does not exist
+  */
+  queryInputPath(partialPath) {
+    for (let inputInfo of this._inputInfo) {
+      if (`/${inputInfo.path}` === partialPath) {
+        return inputInfo.parameters;
+      }
+    }
+    return null;
+  }
 }

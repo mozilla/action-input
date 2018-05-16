@@ -1,7 +1,7 @@
 import InputSource from "./InputSource.js";
 
 /**
- *	KeyboardInputSource watches keyup and keydown events and generates boolean values for listeners.
+ *  KeyboardInputSource watches keyup and keydown events and generates boolean values for listeners.
  */
 export default class KeyboardInputSource extends InputSource {
   constructor(targetElement = document) {
@@ -20,5 +20,17 @@ export default class KeyboardInputSource extends InputSource {
       this._activeKeyCodes.delete(ev.keyCode);
       this.notifyListeners(`key/${ev.keyCode}`, false, {});
     });
+  }
+
+  /**
+  @param partialPath {string} the relative semantic path for an input
+  @return the value of the the input, or null if the path does not exist
+  */
+  queryInputPath(partialPath) {
+    if (partialPath.startsWith("/key/") === false) return null;
+    let keycode = Number.parseInt(partialPath.substring(5), 10);
+    if (Number.isNaN(keycode)) return null;
+    if (this._activeKeyCodes.has(keycode) === false) return false;
+    return true;
   }
 }

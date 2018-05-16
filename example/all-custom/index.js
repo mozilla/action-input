@@ -33,13 +33,17 @@ export default function initInput() {
 
   // Listen for the loo action triggered by /input/random/0/moo and mapped in playing-flat.json to /action/loo
   actionManager.addActionListener("/action/loo", (actionPath, active, actionParameters, inputSource) => {
-    console.log(actionPath, active, actionParameters);
+    console.log("received loo", actionPath, active, actionParameters);
   });
 
   // Listen for the add action triggered by /input/random/0/nums and filtered by /filter/add-value, mapped in playing-flat.json
   actionManager.addActionListener("/action/add", (actionPath, active, actionParameters, inputSource) => {
-    console.log(actionPath, active, actionParameters);
+    console.log("received add", actionPath, active, actionParameters);
   });
+
+  // Query for a specific input path
+  console.log("Value at /input/random/0/moo", actionManager.queryInputPath("/input/random/0/moo"));
+  console.log("Value at /input/random/0/nums", actionManager.queryInputPath("/input/random/0/nums"));
 
   console.log("Waiting for actions. (give it a few seconds)");
 }

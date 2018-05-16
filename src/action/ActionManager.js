@@ -76,6 +76,19 @@ export default class ActionManager {
     if (loadDefaults) this._loadDefaults();
   }
 
+  /*
+  @param inputPath {string} a full semantic path for an input, like '/input/keyboard/key/32'
+  @return the value of the input, or null if it doesn't exist
+  */
+  queryInputPath(inputPath) {
+    for (let inputSourceInfo of this.inputSources) {
+      if (inputPath.startsWith(inputSourceInfo[0]) === false) {
+        continue;
+      }
+      return inputSourceInfo[1].queryInputPath(inputPath.substring(inputSourceInfo[0].length));
+    }
+  }
+
   _loadDefaults() {
     // load all of the input sources and filters needed by the default action sets
     this.addInputSource("gamepad", new GamepadInputSource());
