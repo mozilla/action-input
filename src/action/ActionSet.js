@@ -1,7 +1,7 @@
 import ActionMap from "./ActionMap.js";
 
 /**
- * ActionSet uses an {@link ActionMap} to map {@link InputEvent}s to {@link ActionEvent}s, which it sends to listeners.
+ * ActionSet is used by {@link ActionManager} to track listeners and active state for an {@link ActionMap}
  */
 export default class ActionSet {
   /**
