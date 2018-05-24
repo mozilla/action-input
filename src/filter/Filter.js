@@ -8,14 +8,13 @@ import Type from "../action/Type.js";
 export default class Filter {
   /**
    * @param {string} inputPath
-   * @param {bool} active
-   * @param {Object} inputParameters
+   * @param inputValue
    * @param {string} filterPath
    * @param {Object} filterParameters parameters for use while filtering
    *
    * @return {Array} [value, actionParameters]
    */
-  filter(inputPath, active, inputParameters, filterPath, filterParameters) {
+  filter(inputPath, inputValue, filterPath, filterParameters) {
     throw new Error("Extending classes must override the filter method");
   }
 }

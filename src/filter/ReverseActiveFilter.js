@@ -10,14 +10,13 @@ export default class ReverseActiveFilter extends Filter {
 
   /**
    * @param {string} inputPath
-   * @param {bool} active
-   * @param {Object} inputParameters
+   * @param inputValue
    * @param {string} filterPath
    * @param {Object} filterParameters parameters for use while filtering
    *
-   * @return {Array} [active, actionParameters]
+   * @return {Array} [value, actionParameters]
    */
-  handleInput(inputPath, active, inputParameters, filterPath, filterParameters) {
-    return [!active, {}];
+  filter(inputPath, inputValue, filterPath, filterParameters) {
+    return [!inputValue, null];
   }
 }

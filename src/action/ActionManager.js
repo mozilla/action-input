@@ -1,5 +1,4 @@
 import Type from "./Type.js";
-import ActionSet from "./ActionSet.js";
 import ActionMap from "./ActionMap.js";
 
 import Filter from "../filter/Filter.js";
@@ -10,19 +9,18 @@ import Device from "../hardware/Device.js";
 import Gamepad from "../hardware/Gamepad.js";
 import Keyboard from "../hardware/Keyboard.js";
 
-import InputEvent from "../input/InputEvent.js";
 import InputSource from "../input/InputSource.js";
 import GamepadInputSource from "../input/GamepadInputSource.js";
 import KeyboardInputSource from "../input/KeyboardInputSource.js";
 
 /**
- * If new ActionManager.constructor's loadDefaults param is true then these action sets are loaded
+ * If new ActionManager.constructor's loadDefaults param is true then these action maps are loaded
  */
-const defaultActionSets = [
-  { name: "default-flat", url: "../../src/default/playing-flat-action-set.json" }
+const defaultActionMaps = [
+  { name: "default-flat", url: "../../src/default/playing-flat-action-map.json" }
   /*
-  { name: "default-portal", url: "../default/playing-portal-action-set.json" },
-  { name: "default-immersive", url: "../default/playing-immersive-action-set.json" }
+  { name: "default-portal", url: "../default/playing-portal-action-map.json" },
+  { name: "default-immersive", url: "../default/playing-immersive-action-map.json" }
   */
 ];
 
@@ -51,16 +49,16 @@ export default class ActionManager {
     this._filters = new Map();
 
     /**
-     * name -> {@link ActionSet}
-     * @type {Map<string, ActionSet>}
+     * name -> {@link ActionMap}
+     * @type {Map<string, ActionMap>}
      */
-    this._actionSets = new Map();
+    this._actionMaps = new Map();
 
     /**
-     * zero or one {@link ActionSet}s may be active at any time
-     * @type {ActionSet}
+     * zero or more {@link ActionMap}s may be active at any time
+     * @type {Map<string, ActionMap>}
      */
-    this._activeActionSet = null;
+    this._activeActionMaps = new Map();
 
     /**
      * actionPath -> { action parameters }
@@ -68,42 +66,85 @@ export default class ActionManager {
      */
     this._activeActionInfos = new Map();
 
-    /**
-     * A bound listener function to add and remove from the active ActionSet
-     */
-    this._boundHandleActionSetEvent = this._handleActionSetEvent.bind(this);
+    // Used during updates
+    this._activations = new Map();
+    this._deactivations = new Set();
 
     if (loadDefaults) this._loadDefaults();
   }
 
   /*
   @param inputPath {string} a full semantic path for an input, like '/input/keyboard/key/32'
-  @return the value of the input, or null if it doesn't exist
+  @return [inputValue, inputSource]
   */
   queryInputPath(inputPath) {
     for (let inputSourceInfo of this.inputSources) {
       if (inputPath.startsWith(inputSourceInfo[0]) === false) {
         continue;
       }
-      return inputSourceInfo[1].queryInputPath(inputPath.substring(inputSourceInfo[0].length));
+      return [inputSourceInfo[1].queryInputPath(inputPath.substring(inputSourceInfo[0].length)), inputSourceInfo[1]];
+    }
+    return [null, null];
+  }
+
+  /**
+   * Poll the input states and update Action state.
+   * If you're rendering inside a requestAnimationFrame response, call this at the top of your render loop.
+   */
+  poll() {
+    // Poll inputs
+    this._inputSources.forEach((inputSource, inputPath) => {
+      inputSource.poll();
+    });
+
+    this._activations.clear();
+    this._deactivations.clear();
+
+    this._activeActionMaps.forEach((actionMap, semanticPath) => {
+      actionMap.update(this.queryInputPath.bind(this), (actionPath, active, actionParameters, inputSource) => {
+        if (active) {
+          // Accept the first activation
+          if (this._activations.has(actionPath)) return;
+          this._activations.set(actionPath, [actionPath, actionParameters, inputSource]);
+        } else {
+          this._deactivations.add(actionPath);
+        }
+      });
+    });
+
+    for (const [actionPath, actionParameters, inputSource] of this._activations.values()) {
+      this._deactivations.delete(actionPath); // If we activate it in this update, don't deactivate it
+      if (this._activeActionInfos.has(actionPath)) {
+        this._activeActionInfos.set(actionPath, actionParameters);
+        continue; // Changing an already existing action does not trigger an event
+      }
+      this._activeActionInfos.set(actionPath, actionParameters);
+      this._notifyListeners(actionPath, true, actionParameters, inputSource);
+    }
+    for (const deactivatedActionPath of this._deactivations.values()) {
+      if (this._activeActionInfos.has(deactivatedActionPath) === false) {
+        continue; // Action is not active, so no new event
+      }
+      this._activeActionInfos.delete(deactivatedActionPath);
+      this._notifyListeners(deactivatedActionPath, false, null, null);
     }
   }
 
   _loadDefaults() {
-    // load all of the input sources and filters needed by the default action sets
+    // load all of the input sources and filters needed by the default action maps
     this.addInputSource("gamepad", new GamepadInputSource());
     this.addInputSource("keyboard", new KeyboardInputSource());
 
     this.addFilter("reverse-axis", new ReverseAxisFilter());
     this.addFilter("reverse-active", new ReverseActiveFilter());
 
-    // load the default action sets
-    for (let actionSetInfo of defaultActionSets) {
-      this.addActionSet(actionSetInfo.name, new ActionSet(new ActionMap([...this.filters], actionSetInfo.url), false));
+    // load the default action maps
+    for (let actionMapInfo of defaultActionMaps) {
+      this.addActionMap(actionMapInfo.name, new ActionMap([...this.filters], actionMapInfo.url));
     }
 
-    // activate the initial action set
-    this.switchToActionSet(defaultActionSets[0].name);
+    // activate the initial action map
+    this.switchToActionMaps(defaultActionMaps[0].name);
 
     // TODO load input path aliases
   }
@@ -123,16 +164,6 @@ export default class ActionManager {
     this._filters.set(`/filter/${semanticName}`, filter);
   }
 
-  /**
-   * Poll the input devices that provide polling APIs.
-   * If you're rendering inside a requestAnimationFrame response, call this at the top of your render loop.
-   */
-  pollInputSources() {
-    this._inputSources.forEach((inputSource, inputPath, map) => {
-      inputSource.poll();
-    });
-  }
-
   /** @type {Iterator} over [{string}, {@link InputSource}] items */
   get inputSources() {
     return this._inputSources.entries();
@@ -143,25 +174,7 @@ export default class ActionManager {
    * @param {InputSource} inputSource
    */
   addInputSource(inputPathName, inputSource) {
-    let path = this._findNextInputSourcePath(inputPathName);
-    this._inputSources.set(path, inputSource);
-    inputSource.addListener((subPath, value, params) => {
-      if (this._activeActionSet !== null) {
-        this._activeActionSet.handleInput(`${path}/${subPath}`, value, inputSource, params);
-      }
-    });
-  }
-
-  /**
-   * @param {string} name the name (not path) of a new InputSource, like 'keyboard'
-   * @return {string} a full, indexed semantic path, like '/input/keyboard/2'
-   */
-  _findNextInputSourcePath(name) {
-    let index = 0;
-    while (this._inputSources.has(`/input/${name}/${index}`)) {
-      index += 1;
-    }
-    return `/input/${name}/${index}`;
+    this._inputSources.set(`/input/${inputPathName}`, inputSource);
   }
 
   /**
@@ -174,80 +187,53 @@ export default class ActionManager {
     throw new Error("Not implemented");
   }
 
-  /** @type {Iterator} over [{string}, {@link ActionSet}] items */
-  get actionSets() {
-    return this._actionSets.entries();
+  /** @type {Iterator} over [mapName {string}, {@link ActionMap}] items */
+  get actionMaps() {
+    return this._actionMaps.entries();
   }
 
-  /** @type {ActionSet} may be null */
-  get activeActionSet() {
-    return this._activeActionSet;
+  /** @type {Iterator} over [mapName {string}, {@link ActionMap}] items */
+  get activeActionMaps() {
+    return this._activeActionMaps.entries();
   }
 
   /**
    * @param {string} name
-   * @param {ActionSet} actionSet
+   * @param {ActionMap} actionMap
    */
-  addActionSet(name, actionSet) {
-    this._actionSets.set(name, actionSet);
+  addActionMap(name, actionMap) {
+    this._actionMaps.set(name, actionMap);
   }
 
   /**
    * @param {string} name
    * @return {bool} true if it existed and is removed
    */
-  removeActionSet(name) {
-    return this._actionSets.delete(name);
+  removeActionMap(name) {
+    return this._actionMaps.delete(name);
   }
 
   /**
-   * Activate a named ActionSet.
-   * There is only ever zero or one active ActionSet.
-   * @param {string} name
-   * @return {bool} true if the named ActionSet is in this.actionSets, otherwise false
+   * Activate named {@link ActionMap}s.
+   * @param {string} names
    */
-  switchToActionSet(name) {
-    if (this._actionSets.has(name) === false) return false;
-    if (this._activeActionSet !== null) {
-      this._activeActionSet.removeActionListener(this._boundHandleActionSetEvent);
-      this._activeActionInfos.clear();
-    }
-    this._activeActionSet = this._actionSets.get(name);
-    this._activeActionSet.addActionListener(this._boundHandleActionSetEvent);
-    return true;
-  }
-
-  /**
-   * Deactivates the currently active ActionSet, if any.
-   */
-  clearActiveActionSet() {
-    if (this._activeActionSet !== null) {
-      this._activeActionSet.removeActionListener(this._boundHandleActionSetEvent);
-      this._activeActionInfos.clear();
-    }
-    this._activeActionSet = null;
-  }
-
-  /**
-   * The listener function that we add and remove from ActionSets as they become active and inactive
-   */
-  _handleActionSetEvent(actionPath, active, actionParameters, inputSource) {
-    if (active) {
-      if (this._activeActionInfos.has(actionPath)) {
-        this._activeActionInfos.set(actionPath, actionParameters);
-        return; // Changing an already existing action does not trigger an event
+  switchToActionMaps(...names) {
+    this._activeActionInfos.clear();
+    this._activeActionMaps.clear();
+    for (let name of names) {
+      if (this._actionMaps.has(name) === false) {
+        console.error("unknown map name", name);
+        continue;
       }
-      this._activeActionInfos.set(actionPath, actionParameters);
-      this._notifyListeners(actionPath, true, actionParameters, inputSource);
-    } else {
-      if (this._activeActionInfos.has(actionPath) === false) {
-        return; // Action is not active, so no new event
-      }
-      this._activeActionInfos.delete(actionPath);
-      this._notifyListeners(actionPath, false, actionParameters, inputSource);
+      this._activeActionMaps.set(name, this._actionMaps.get(name));
     }
+  }
 
-    // TODO Notify local action listeners
+  /**
+   * Deactivates the currently active {@link ActionMap}s, if any.
+   */
+  clearActiveActionMaps() {
+    this.switchToActionMaps();
   }
 
   /**

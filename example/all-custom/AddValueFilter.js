@@ -6,16 +6,15 @@ import Filter from "../../src/filter/Filter.js";
 export default class AddValueFilter extends Filter {
   /**
    * @param {string} inputPath
-   * @param {bool} active
-   * @param {Object} inputParameters
+   * @param inputValue
    * @param {string} filterPath
    * @param {Object} filterParameters parameters for use while filtering
    *
-   * @return {Array} [active, actionParameters]
+   * @return {Array} [value, actionParameters]
    */
-  handleInput(inputPath, active, inputParameters, filterPath, filterParameters) {
-    let actionParameters = { value: inputParameters.value || 0 };
+  filter(inputPath, inputValue, filterPath, filterParameters) {
+    let actionParameters = { value: inputValue || 0 };
     actionParameters.value += filterParameters.value || 0;
-    return [active, actionParameters];
+    return [actionParameters.value, actionParameters];
   }
 }

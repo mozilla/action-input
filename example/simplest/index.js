@@ -5,7 +5,7 @@ export default function initInput() {
   let actionManager = new ActionManager(true);
 
   // Switch to the action set that handles play situations for flat displays
-  actionManager.switchToActionSet("/action-set/flat-playing");
+  actionManager.switchToActionMaps("default-flat");
 
   // The app can listen for a single action
   actionManager.addActionListener("/action/move", (actionPath, active, actionParameters, inputSource) => {
@@ -35,5 +35,9 @@ export default function initInput() {
     }
   */
 
+  // If you're using a requestAnimationFrame loop, call poll() at the top of that
+  setInterval(() => {
+    actionManager.poll();
+  }, 50);
   console.log("Waiting for actions");
 }

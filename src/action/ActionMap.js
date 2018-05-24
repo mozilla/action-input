@@ -12,6 +12,7 @@ export default class ActionMap {
      * @type {Map<string, Filter>}
      */
     this._filters = new Map();
+
     for (let filterInfo of filters) {
       this._filters.set(...filterInfo);
     }
@@ -25,7 +26,6 @@ export default class ActionMap {
      * @type {Map<string, Set<Object>>}
      */
     this._bindings = new Map();
-    this._listeners = new Set();
     this.loadURL(url);
   }
 
@@ -86,61 +86,39 @@ export default class ActionMap {
   }
 
   /**
-   * @param {function} listener will receive callbacks of the form ({@link ActionEvent}, inputPath, sourceDevices, ...params)
+   * Called by ActionManager to trigger mapping
+   * Note that ActionMaps may send the ActionManager conflicting activation and deactivation info for a single action.
+   * Per-update, the ActionManager will accept the first activation for each action.
+   * If there are no activations for an action, then the ActionManager will accept the first deactivation for an action.
    */
-  addListener(listener) {
-    this._listeners.add(listener);
-  }
-
-  removeListener(listener) {
-    return this._listeners.delete(listener);
-  }
-
-  _notifyListeners(...params) {
-    this._listeners.forEach(listener => {
-      listener(...params);
-    });
-  }
-
-  /**
-   * Called by ActionSet to trigger mapping
-   *
-   * @param {string} inputPath a full semantic path for an {@link InputEvent} like '/input/hand/finger/0/touch'
-   * @param {bool} active
-   * @param {InputSource} inputSource the input source that led to the event
-   * @param {Object} inputParameters zero or more event-specific parameters that give the event more context
-   */
-  handleInput(inputPath, active, inputSource, inputParameters) {
-    let bindingSet = this._bindings.get(inputPath);
-    if (typeof bindingSet === "undefined") {
-      //console.log("unhandled input event", inputPath, value, inputSource, inputParameters);
-      return;
-    }
-    bindingSet.forEach(info => {
-      if (info.filter === null) {
-        this._notifyListeners(
-          info.action,
-          active,
-          Object.assign({}, info.actionParameters, inputParameters),
-          inputSource
-        );
-        return;
-      } else {
-        let filter = this._filters.get(info.filter);
+  update(queryInputPath, updateCallback) {
+    for (const [inputPath, bindingInfos] of this._bindings.entries()) {
+      if (bindingInfos.size === 0) continue;
+      const [inputValue, inputSource] = queryInputPath(inputPath);
+      bindingInfos.forEach(info => {
+        if (info.filter === null) {
+          const active = !!inputValue;
+          updateCallback(info.action, active, info.actionParameters, inputSource);
+          return;
+        }
+        const filter = this._filters.get(info.filter);
         if (typeof filter === "undefined") {
           console.error("Unknown filter", info.filter);
           return;
         }
-        let results = filter.handleInput(inputPath, active, inputParameters, info.filter, info.filterParameters);
-        if (results) {
-          this._notifyListeners(
-            info.action,
-            results[0],
-            Object.assign({}, inputParameters, info.actionParameters, results[1]),
-            inputSource
-          );
-        }
-      }
-    });
+        const [filteredValue, filteredActionParameters] = filter.filter(
+          inputPath,
+          inputValue,
+          info.filter,
+          info.filterParameters
+        );
+        const active = !!filteredValue;
+        const actionParams =
+          filteredActionParameters === null
+            ? info.actionParameters
+            : Object.assign({}, info.actionParameters, filteredActionParameters);
+        updateCallback(info.action, active, actionParams, inputSource);
+      });
+    }
   }
 }
