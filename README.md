@@ -1,12 +1,10 @@
 # Mozilla XR Input
 
-A framework-agnostic input library for the wider web, A near future web that responsively supports:
+A framework-agnostic input library for the wider web, a near future web that responsively supports:
 
 * _3 display modes_: flat, portal, and immersive
 * _3 control types_: page, overlay, and spatial
 * _new inputs_: tracked wands, hand gestures, and voice
-
-In order for WebXR applications to continue to work as new input hardware is created, Mozilla will maintain these libraries and publish them to a CDN for public use. Eventually, the WebXR input APIs may replace some of the functionality, but apps built using these libraries should continue to work.
 
 ## High level features
 
