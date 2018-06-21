@@ -41,6 +41,11 @@
       "parameters": {
         "y": -0.5
       }
+    },
+    {
+      "comment": "Activate on mouse click",
+      "source": "/input/mouse/0/primary-button",
+      "destination": "/action/activate"
     }
   ],
   "aliases": []

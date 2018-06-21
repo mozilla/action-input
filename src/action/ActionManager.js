@@ -1,4 +1,3 @@
-import Type from "./Type.js";
 import ActionMap from "./ActionMap.js";
 
 import Filter from "../filter/Filter.js";
@@ -10,6 +9,7 @@ import Gamepad from "../hardware/Gamepad.js";
 import Keyboard from "../hardware/Keyboard.js";
 
 import InputSource from "../input/InputSource.js";
+import MouseInputSource from "../input/MouseInputSource.js";
 import GamepadInputSource from "../input/GamepadInputSource.js";
 import KeyboardInputSource from "../input/KeyboardInputSource.js";
 
@@ -17,7 +17,7 @@ import KeyboardInputSource from "../input/KeyboardInputSource.js";
  * If new ActionManager.constructor's loadDefaults param is true then these action maps are loaded
  */
 const defaultActionMaps = [
-  { name: "default-flat", url: "../../src/default/playing-flat-action-map.json" }
+  { name: "default-flat", url: "/js/action-input/default/playing-flat-action-map.json" }
   /*
   { name: "default-portal", url: "../default/playing-portal-action-map.json" },
   { name: "default-immersive", url: "../default/playing-immersive-action-map.json" }
@@ -30,6 +30,7 @@ const defaultActionMaps = [
  */
 export default class ActionManager {
   constructor(loadDefaults = true) {
+    this.queryInputPath = this.queryInputPath.bind(this);
     /**
      * input semantic path (with wildcards) -> action listener {function}
      * @type {Map<string, function>}
@@ -68,9 +69,9 @@ export default class ActionManager {
 
     // Used during updates
     this._activations = new Map();
-    this._deactivations = new Set();
+    this._deactivations = new Map();
 
-    if (loadDefaults) this._loadDefaults();
+    if (loadDefaults) this.loadDefaults();
   }
 
   /*
@@ -100,14 +101,14 @@ export default class ActionManager {
     this._activations.clear();
     this._deactivations.clear();
 
-    this._activeActionMaps.forEach((actionMap, semanticPath) => {
-      actionMap.update(this.queryInputPath.bind(this), (actionPath, active, actionParameters, inputSource) => {
+    this._activeActionMaps.forEach((actionMap, name) => {
+      actionMap.update(this.queryInputPath, (actionPath, active, actionParameters, inputSource) => {
         if (active) {
           // Accept the first activation
           if (this._activations.has(actionPath)) return;
           this._activations.set(actionPath, [actionPath, actionParameters, inputSource]);
         } else {
-          this._deactivations.add(actionPath);
+          this._deactivations.set(actionPath, [actionPath, actionParameters, inputSource]);
         }
       });
     });
@@ -121,19 +122,20 @@ export default class ActionManager {
       this._activeActionInfos.set(actionPath, actionParameters);
       this._notifyListeners(actionPath, true, actionParameters, inputSource);
     }
-    for (const deactivatedActionPath of this._deactivations.values()) {
-      if (this._activeActionInfos.has(deactivatedActionPath) === false) {
+    for (const [actionPath, actionParameters, inputSource] of this._deactivations.values()) {
+      if (this._activeActionInfos.has(actionPath) === false) {
         continue; // Action is not active, so no new event
       }
-      this._activeActionInfos.delete(deactivatedActionPath);
-      this._notifyListeners(deactivatedActionPath, false, null, null);
+      this._activeActionInfos.delete(actionPath);
+      this._notifyListeners(actionPath, false, actionParameters, inputSource);
     }
   }
 
-  _loadDefaults() {
+  loadDefaults() {
     // load all of the input sources and filters needed by the default action maps
     this.addInputSource("gamepad", new GamepadInputSource());
     this.addInputSource("keyboard", new KeyboardInputSource());
+    this.addInputSource("mouse", new MouseInputSource());
 
     this.addFilter("reverse-axis", new ReverseAxisFilter());
     this.addFilter("reverse-active", new ReverseActiveFilter());

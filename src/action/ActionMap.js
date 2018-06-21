@@ -26,7 +26,9 @@ export default class ActionMap {
      * @type {Map<string, Set<Object>>}
      */
     this._bindings = new Map();
-    this.loadURL(url);
+    if (url !== null) {
+      this.loadURL(url);
+    }
   }
 
   /**
@@ -116,7 +118,7 @@ export default class ActionMap {
         const actionParams =
           filteredActionParameters === null
             ? info.actionParameters
-            : Object.assign({}, info.actionParameters, filteredActionParameters);
+            : Object.assign({ value: filteredValue }, info.actionParameters, filteredActionParameters);
         updateCallback(info.action, active, actionParams, inputSource);
       });
     }

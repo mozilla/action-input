@@ -1,5 +1,3 @@
-import Type from "../action/Type.js";
-
 /**
  * Filter takes in input information and emits {@link ActionEvent}s.
  * It defines its inputs and outputs using {@link Type}s.
