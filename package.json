@@ -1,6 +1,6 @@
 {
-  "name": "xr-input",
-  "version": "1.0.0",
+  "name": "action-input",
+  "version": "0.1.0",
   "description": "A framework-agnostic input library that progressively handles flat, portal, and immersive web apps.",
   "main": "",
   "license": "MPL 2.0",
@@ -15,11 +15,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mozilla/xr-input.git"
+    "url": "git+https://github.com/mozilla/action-input.git"
   },
   "author": "Mozilla",
   "bugs": {
-    "url": "https://github.com/mozilla/xr-input/issues"
+    "url": "https://github.com/mozilla/action-input/issues"
   },
   "prettier": {
     "printWidth": 120
@@ -41,7 +41,7 @@
       "no-var": "error"
     }
   },
-  "homepage": "https://github.com/mozilla/xr-input#readme",
+  "homepage": "https://github.com/mozilla/action-input#readme",
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
