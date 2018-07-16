@@ -1,7 +1,5 @@
 import InputSource from "./InputSource.js";
 
-import { throttledConsoleLog } from "../../potassium/throttle.js";
-
 /**
  *  GamepadInputSource watches the gamepad API and tracks the state of gamepads
  *  Gamepads can be referenced by index or hand: /0|left|right/...

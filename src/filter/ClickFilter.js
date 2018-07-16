@@ -2,7 +2,7 @@ import Filter from "./Filter.js";
 
 /**
  * ClickFilter activates the action if input is truthy.
- * More usefully, it queries for the target of the click and returns either null or a Potassium.Component
+ * More usefully, it queries for the target of the click and returns either null or a el.component
  * The target path is /1/2/target where 1 and 2 are the first two elements in the input path
  */
 export default class ClickFilter extends Filter {
