@@ -1,5 +1,7 @@
 import InputSource from "./InputSource.js";
 
+import { throttledConsoleLog } from "../../potassium/throttle.js";
+
 /**
  *	GamepadInputSource watches the gamepad API and tracks the state of gamepads
  *  Gamepads can be referenced by index or hand: /0|left|right/...
@@ -39,6 +41,7 @@ export default class GamepadInputSource extends InputSource {
     var gamepad = null;
     if (tokens[0] === "left" || tokens[0] === "right") {
       for (let gp of this._gamepads) {
+        if (gp === null) continue;
         if (gp.hand === tokens[0]) {
           gamepad = gp;
           break;

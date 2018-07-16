@@ -2,6 +2,8 @@ import InputSource from "./InputSource.js";
 
 /**
  *  KeyboardInputSource watches keyup and keydown events and tracks key up/down state
+ *
+ *  /input/keyboard/*|0/key/*|keyCode
  */
 export default class KeyboardInputSource extends InputSource {
   constructor(targetElement = document) {
@@ -25,8 +27,19 @@ export default class KeyboardInputSource extends InputSource {
   @return the value of the the input, or null if the path does not exist
   */
   queryInputPath(partialPath) {
-    if (partialPath.startsWith("/0/key/") === false) return null;
-    let keycode = Number.parseInt(partialPath.substring(7), 10);
+    if (partialPath.startsWith("/0/key/") === false && partialPath.startsWith("/*/key/") === false) return null;
+
+    const lastToken = partialPath.substring(7);
+
+    if (lastToken === "*") {
+      const values = [];
+      for (let value of this._activeKeyCodes.values()) {
+        values[values.length] = value;
+      }
+      return values;
+    }
+
+    let keycode = Number.parseInt(lastToken, 10);
     if (Number.isNaN(keycode)) return null;
     return this._activeKeyCodes.has(keycode);
   }

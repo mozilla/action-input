@@ -20,7 +20,8 @@ export default class ClickFilter extends Filter {
    * @return {Array} [value, actionParameters]
    */
   filter(inputPath, inputValue, filterPath, filterParameters) {
-    return [!!inputValue, { targetComponent: this._getTarget(inputPath) }];
+    const target = this._getTarget(inputPath);
+    return [!!inputValue, { targetComponent: target }];
   }
 
   _getTarget(inputPath) {
