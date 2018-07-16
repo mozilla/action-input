@@ -3,7 +3,7 @@ import InputSource from "./InputSource.js";
 import { throttledConsoleLog } from "../../potassium/throttle.js";
 
 /**
- *	GamepadInputSource watches the gamepad API and tracks the state of gamepads
+ *  GamepadInputSource watches the gamepad API and tracks the state of gamepads
  *  Gamepads can be referenced by index or hand: /0|left|right/...
  *
  *  The base values of the gamepad and pose (if it's present) is available like so:
@@ -65,15 +65,15 @@ export default class GamepadInputSource extends InputSource {
         case "has-orientation":
           return !!gamepad.pose && gamepad.pose.hasOrientation === true;
         case "has-position":
-          return gamepad.pose ? gamepad.pose.hasPosition === true : false;
+          return gamepad.pose && gamepad.pose.hasPosition === true;
         case "position":
-          return gamepad.pose ? gamepad.pose.position || null : null;
+          return (gamepad.pose && gamepad.pose.position) || null;
         case "orientation":
-          return gamepad.pose ? gamepad.pose.orientation || null : null;
+          return (gamepad.pose && gamepad.pose.orientation) || null;
         case "linear-velocity":
-          return gamepad.pose ? gamepad.pose.linearVelocity || null : null;
+          return (gamepad.pose && gamepad.pose.linearVelocity) || null;
         case "angular-velocity":
-          return gamepad.pose ? gamepad.pose.angularVelocity || null : null;
+          return (gamepad.pose && gamepad.pose.angularVelocity) || null;
         default:
           return null;
       }

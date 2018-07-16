@@ -1,26 +1,16 @@
 # Mozilla XR Input
 
-A framework-agnostic input library for the wider web, a near future web that responsively supports:
-
-* _3 display modes_: flat, portal, and immersive
-* _3 control types_: page, overlay, and spatial
-* _new inputs_: tracked wands, hand gestures, and voice
+A framework-agnostic input library for the web.
 
 ## High level features
 
 Map low level events like button pushes and hand gestures to semantic actions like point, select, and activate.
 
-Provide 3D models, reference images, and metadata (including control position) for input hardware.
-
-Provide default input maps for existing hardware and regularly release new maps for new hardware.
-
-Provide users with the ability to create their own input configurations to enable apps to support users preferences and accessibility needs.
-
 ## Main classes
 
 **ActionManager**
 
-This is the class that most web apps will use to configure and then react to user actions. It exposes a polling API and an event API.
+This is the class that web apps will use to configure and then react to user actions. It exposes a polling API and an event API.
 
 **ActionMap**
 
@@ -28,9 +18,7 @@ This maps low level input state to high level semantic actions. For example, a b
 
 ActionMaps are usually configured by initializing them with a JSON file.
 
-Zero or more ActionMaps can be activated at any time using the API on ActionManager.
-
-Included in the library are JSON files for common applications scenarios.
+Multiple ActionMaps can be activated at any time using the API on ActionManager.
 
 **InputSource**
 
@@ -43,6 +31,12 @@ Included in the library are InputSources for common hardware like keyboards, gam
 This holds information about a specific piece of hardware, such as a tracked wand or a keyboard. InputSources may reference a Device to indicate the source of input, and applications can query Devices for metadata such as their 3D models and the positions of their buttons.
 
 ## Possible future work
+
+Provide 3D models, reference images, and metadata (including control position) for input hardware.
+
+Provide default input maps for existing hardware and regularly release new maps for new hardware.
+
+Provide end users with the ability to create their own input configurations to enable apps to support users preferences and accessibility needs.
 
 **Recording and playback library**
 

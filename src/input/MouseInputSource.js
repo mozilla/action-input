@@ -25,37 +25,16 @@ export default class MouseInputSource extends InputSource {
     this._appX = null;
     this._appY = null;
 
-    this._primaryButton = false;
-    this._secondaryButton = false;
-    this._tertiaryButton = false;
+    /** {bool} true if the button at index is down */
+    this._buttons = [];
 
     targetElement.addEventListener("mousemove", this._updatePosition);
     targetElement.addEventListener("mousedown", ev => {
-      switch (ev.button) {
-        case 0:
-          this._primaryButton = true;
-          break;
-        case 1:
-          this._secondaryButton = true;
-          break;
-        case 2:
-          this._tertiaryButton = true;
-          break;
-      }
+      this._buttons[ev.button] = true;
       this._updatePosition(ev);
     });
     targetElement.addEventListener("mouseup", ev => {
-      switch (ev.button) {
-        case 0:
-          this._primaryButton = false;
-          break;
-        case 1:
-          this._secondaryButton = false;
-          break;
-        case 2:
-          this._tertiaryButton = false;
-          break;
-      }
+      this._buttons[ev.button] = false;
       this._updatePosition(ev);
     });
   }
@@ -70,6 +49,23 @@ export default class MouseInputSource extends InputSource {
     if (partialPath.startsWith("/0/") === false && partialPath.startsWith("/*/") === false) return null;
 
     const path = partialPath.substring(3);
+
+    if (path.startsWith("button/")) {
+      const specifier = path.substring(7);
+      switch (path) {
+        case "primary":
+          return !!this._buttons[0];
+        case "secondary":
+          return !!this._buttons[1];
+        case "tertiary":
+          return !!this._buttons[2];
+        default:
+          const index = Number.parseInt(path.substring(7), 10);
+          if (Number.isNaN(index)) return null;
+          return !!this._buttons[index];
+      }
+    }
+
     switch (path) {
       case "normalized-position":
         return this._normalizedX === null ? null : [this._normalizedX, this._normalizedY];
@@ -83,12 +79,6 @@ export default class MouseInputSource extends InputSource {
         return this._movementX === null ? null : [this._movementX, this._movementY];
       case "app-position":
         return this._appX === null ? null : [this._appX, this._appY];
-      case "button/primary":
-        return this._primaryButton;
-      case "button/secondary":
-        return this._secondaryButton;
-      case "button/tertiary":
-        return this._tertiaryButton;
     }
   }
 
