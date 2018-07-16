@@ -2,7 +2,6 @@ import ActionMap from "./ActionMap.js";
 
 import Filter from "../filter/Filter.js";
 import ReverseActiveFilter from "../filter/ReverseActiveFilter.js";
-import ReverseAxisFilter from "../filter/ReverseAxisFilter.js";
 
 import Device from "../hardware/Device.js";
 import Gamepad from "../hardware/Gamepad.js";
@@ -137,7 +136,6 @@ export default class ActionManager {
     this.addInputSource("keyboard", new KeyboardInputSource());
     this.addInputSource("mouse", new MouseInputSource());
 
-    this.addFilter("reverse-axis", new ReverseAxisFilter());
     this.addFilter("reverse-active", new ReverseActiveFilter());
 
     // load the default action maps
