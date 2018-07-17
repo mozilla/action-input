@@ -52,7 +52,7 @@ export default class MouseInputSource extends InputSource {
 
     if (path.startsWith("button/")) {
       const specifier = path.substring(7);
-      switch (path) {
+      switch (specifier) {
         case "primary":
           return !!this._buttons[0];
         case "secondary":
