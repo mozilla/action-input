@@ -27,7 +27,9 @@ export default class ActionMap {
      */
     this._bindings = new Map();
     if (url !== null) {
-      this.loadURL(url);
+      this.loadURL(url).catch((...params) => {
+        console.error("Error loading ActionMap", ...params);
+      });
     }
   }
 

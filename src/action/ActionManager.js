@@ -1,34 +1,10 @@
 import ActionMap from "./ActionMap.js";
 
-import Filter from "../filter/Filter.js";
-import ReverseActiveFilter from "../filter/ReverseActiveFilter.js";
-
-import Device from "../hardware/Device.js";
-import Gamepad from "../hardware/Gamepad.js";
-import Keyboard from "../hardware/Keyboard.js";
-
-import InputSource from "../input/InputSource.js";
-import MouseInputSource from "../input/MouseInputSource.js";
-import GamepadInputSource from "../input/GamepadInputSource.js";
-import KeyboardInputSource from "../input/KeyboardInputSource.js";
-
-/**
- * If new ActionManager.constructor's loadDefaults param is true then these action maps are loaded
- */
-const defaultActionMaps = [
-  { name: "default-flat", url: "/js/action-input/default/playing-flat-action-map.json" }
-  /*
-  { name: "default-portal", url: "../default/playing-portal-action-map.json" },
-  { name: "default-immersive", url: "../default/playing-immersive-action-map.json" }
-  */
-];
-
 /**
  *
- * TODO figure out how to create links/aliases from specific hw inputs to generic inputs
  */
 export default class ActionManager {
-  constructor(loadDefaults = true) {
+  constructor() {
     this.queryInputPath = this.queryInputPath.bind(this);
     /**
      * input semantic path (with wildcards) -> action listener {function}
@@ -69,8 +45,6 @@ export default class ActionManager {
     // Used during updates
     this._activations = new Map();
     this._deactivations = new Map();
-
-    if (loadDefaults) this.loadDefaults();
   }
 
   /*
@@ -130,25 +104,6 @@ export default class ActionManager {
     }
   }
 
-  loadDefaults() {
-    // load all of the input sources and filters needed by the default action maps
-    this.addInputSource("gamepad", new GamepadInputSource());
-    this.addInputSource("keyboard", new KeyboardInputSource());
-    this.addInputSource("mouse", new MouseInputSource());
-
-    this.addFilter("reverse-active", new ReverseActiveFilter());
-
-    // load the default action maps
-    for (let actionMapInfo of defaultActionMaps) {
-      this.addActionMap(actionMapInfo.name, new ActionMap([...this.filters], actionMapInfo.url));
-    }
-
-    // activate the initial action map
-    this.switchToActionMaps(defaultActionMaps[0].name);
-
-    // TODO load input path aliases
-  }
-
   /**
    * @type {Iterator} over [{string}, {@link Filter}] items
    */
@@ -164,6 +119,10 @@ export default class ActionManager {
     this._filters.set(`/filter/${semanticName}`, filter);
   }
 
+  removeFilter(semanticName) {
+    this._filters.delete(`/filter/${semanticName}`);
+  }
+
   /** @type {Iterator} over [{string}, {@link InputSource}] items */
   get inputSources() {
     return this._inputSources.entries();
@@ -175,16 +134,6 @@ export default class ActionManager {
    */
   addInputSource(inputPathName, inputSource) {
     this._inputSources.set(`/input/${inputPathName}`, inputSource);
-  }
-
-  /**
-   * Add a path alias for an semantic input path, usually creating a more abstract alias for a specific input.
-   * For example, one might alias `/input/vive/controller/left/button/0` to `/input/hand/left/finger/0`
-   * @param {string} inputPath a full semantic path for the input source
-   * @param {string} aliasPath the alias for the inputPath
-   */
-  aliasInputPath(inputPath, aliasPath) {
-    throw new Error("Not implemented");
   }
 
   /** @type {Iterator} over [mapName {string}, {@link ActionMap}] items */
@@ -214,19 +163,39 @@ export default class ActionManager {
   }
 
   /**
-   * Activate named {@link ActionMap}s.
-   * @param {string} names
+   * Activate {@link ActionMap}s that have already been added.
+   * Does not deactivate any other active ActionMaps.
+   * @param {...string} action-map names
    */
-  switchToActionMaps(...names) {
-    this._activeActionInfos.clear();
-    this._activeActionMaps.clear();
+  activateActionMaps(...names) {
     for (let name of names) {
-      if (this._actionMaps.has(name) === false) {
-        console.error("unknown map name", name);
+      if (!this._actionMaps.get(name)) {
+        console.error("Tried to activate unknown action map:", name);
         continue;
       }
       this._activeActionMaps.set(name, this._actionMaps.get(name));
     }
+  }
+
+  /**
+   * Deactivate {@link ActionMap}s that have already been added.
+   * Does not deactivate any other active ActionMaps.
+   * @param {...string} action-map names
+   */
+  deactivateActionMaps(...names) {
+    for (let name of names) {
+      this._activeActionMaps.delete(name);
+    }
+  }
+
+  /**
+   * Clear active ActionMaps and then activate the named {@link ActionMap}s.
+   * @param {...string} action-map names
+   */
+  switchToActionMaps(...names) {
+    this._activeActionInfos.clear();
+    this._activeActionMaps.clear();
+    this.activateActionMaps(...names);
   }
 
   /**

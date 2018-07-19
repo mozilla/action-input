@@ -1,7 +1,7 @@
 {
   "name": "action-input",
   "version": "0.1.0",
-  "description": "A framework-agnostic input library that progressively handles flat, portal, and immersive web apps.",
+  "description": "A framework-agnostic input library.",
   "main": "",
   "license": "MPL 2.0",
   "scripts": {

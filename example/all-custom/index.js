@@ -8,8 +8,7 @@ import DummyInputSource from "./DummyInputSource.js";
  * This demonstrates how to set up a completely custom ActionManager, using none of the default input sources, maps, or filters.
  */
 export default function initInput() {
-  // Create an action manager without defaults
-  let actionManager = new ActionManager(false);
+  let actionManager = new ActionManager();
 
   actionManager.addInputSource(
     "dummy", // will be mapped to /input/dummy/0/
