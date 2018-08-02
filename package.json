@@ -1,24 +1,25 @@
 {
-  "name": "xr-input",
-  "version": "1.0.0",
-  "description": "A framework-agnostic input library that progressively handles flat, portal, and immersive web apps.",
+  "name": "action-input",
+  "version": "0.1.0",
+  "description": "A framework-agnostic input library.",
   "main": "",
   "license": "MPL 2.0",
   "scripts": {
     "all": "npm run-script build && npm run-script docs",
     "build": "webpack",
     "docs": "./node_modules/.bin/esdoc",
+    "start": "npm run build && http-server .",
     "precommit": "pretty-quick --staged",
     "lint": "eslint src",
     "prettier": "prettier --write src/**/*.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mozilla/xr-input.git"
+    "url": "git+https://github.com/mozilla/action-input.git"
   },
   "author": "Mozilla",
   "bugs": {
-    "url": "https://github.com/mozilla/xr-input/issues"
+    "url": "https://github.com/mozilla/action-input/issues"
   },
   "prettier": {
     "printWidth": 120
@@ -40,7 +41,7 @@
       "no-var": "error"
     }
   },
-  "homepage": "https://github.com/mozilla/xr-input#readme",
+  "homepage": "https://github.com/mozilla/action-input#readme",
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
@@ -56,6 +57,7 @@
     "husky": "^0.14.3",
     "prettier": "1.10.2",
     "pretty-quick": "^1.4.1",
-    "webpack": "^3.8.1"
+    "webpack": "^3.8.1",
+    "http-server": "^0.10.0"
   }
 }

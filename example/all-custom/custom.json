@@ -1,0 +1,24 @@
+{
+  "comment": "Custom maps",
+  "filters": [
+    {
+      "comment": "Add 10 to values from the random nums input",
+      "filter": "/filter/add-value",
+      "filterParameters": { "value": 44 },
+      "actionParameters": { "added-to": true },
+      "source": "/input/random/0/nums",
+      "destination": "/action/add"
+    }
+  ],
+  "inputs": [
+    {
+      "comment": "Bind a random moo input to the loo action",
+      "source": "/input/random/0/moo",
+      "destination": "/action/loo",
+      "parameters": {
+        "bar": "blatz"
+      }
+    }
+  ],
+  "aliases": []
+}

@@ -1,0 +1,51 @@
+{
+  "comment": "Flat Playing",
+  "filters": [
+    {
+      "filter": "/filter/reverse-active",
+      "filterParameters": {},
+      "actionParameters": {},
+      "source": "/input/keyboard/0/key/90",
+      "destination": "/action/test"
+    }
+  ],
+  "inputs": [
+    {
+      "comment": "Move forward at half speed",
+      "source": "/input/keyboard/0/key/87",
+      "destination": "/action/move",
+      "parameters": {
+        "z": -0.5
+      }
+    },
+    {
+      "comment": "Move backward at half speed",
+      "source": "/input/keyboard/0/key/83",
+      "destination": "/action/move",
+      "parameters": {
+        "z": 0.5
+      }
+    },
+    {
+      "comment": "Rotate left at half speed",
+      "source": "/input/keyboard/0/key/65",
+      "destination": "/action/rotate",
+      "parameters": {
+        "y": 0.5
+      }
+    },
+    {
+      "comment": "Rotate right at half speed",
+      "source": "/input/keyboard/0/key/68",
+      "destination": "/action/rotate",
+      "parameters": {
+        "y": -0.5
+      }
+    },
+    {
+      "comment": "Activate on mouse click",
+      "source": "/input/mouse/0/primary-button",
+      "destination": "/action/activate"
+    }
+  ]
+}
