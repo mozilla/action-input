@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "A framework-agnostic input library.",
   "main": "",
-  "license": "MPL 2.0",
+  "license": "MPL-2.0",
   "scripts": {
     "all": "npm run-script build && npm run-script docs",
     "build": "webpack",
