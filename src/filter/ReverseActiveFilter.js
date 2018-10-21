@@ -19,4 +19,7 @@ export default class ReverseActiveFilter extends Filter {
   filter(inputPath, inputValue, filterPath, filterParameters) {
     return [!inputValue, null];
   }
+
+  /** @return {string} a human readable name */
+  get name(){ return 'ReverseActionFilter' }  
 }

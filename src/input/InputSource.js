@@ -19,4 +19,7 @@ export default class InputSource {
   sendHapticPulse(pulseMilliseconds) {
     // InputSources should override if they have haptic capabilities
   }
+
+  /** @return {string} a human readable name */
+  get name(){ return 'InputSource' }
 }

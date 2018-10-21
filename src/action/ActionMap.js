@@ -33,6 +33,22 @@ export default class ActionMap {
     }
   }
 
+  prettyPrint(tabDepth=0){
+    let tabs = ''
+    for (let i = 0; i < tabDepth; i++) tabs += '\t'
+    console.log(tabs + 'ActionMap')
+    for(const [path, binding] of this._bindings){
+      console.log(tabs + '\t' + path)
+      for(const pathInfo of binding){
+        console.log(tabs + '\t\tbinding:')
+        console.log(tabs + '\t\t\taction:', pathInfo.action)
+        console.log(tabs + '\t\t\tactionParameters:', pathInfo.actionParameters)
+        console.log(tabs + '\t\t\tfilter:', pathInfo.filter)
+        console.log(tabs + '\t\t\tfilterParameters:', pathInfo.filterParameters)
+      }
+    }
+  }
+
   /**
    * bind inputs to actions and filter using JSON data at url
    * @param {string} url a relative or fully qualified URL that points to a JSON map

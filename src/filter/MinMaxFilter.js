@@ -33,6 +33,9 @@ let MinMaxFilter = class extends Filter {
     }
     return [input, {}];
   }
+
+  /** @return {string} a human readable name */
+  get name(){ return 'MinMaxFilter' }
 };
 MinMaxFilter.DefaultMinimum = -1;
 MinMaxFilter.DefaultMaximum = 1;

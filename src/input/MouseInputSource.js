@@ -39,6 +39,9 @@ export default class MouseInputSource extends InputSource {
     });
   }
 
+  /** @return {string} a human readable name */
+  get name(){ return 'MouseInputSource' }
+
   /**
   @param partialPath {string} the relative semantic path for an input
   @return the value of the the input, or null if the path does not exist

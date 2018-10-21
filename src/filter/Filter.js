@@ -15,4 +15,7 @@ export default class Filter {
   filter(inputPath, inputValue, filterPath, filterParameters) {
     throw new Error("Extending classes must override the filter method");
   }
+
+  /** @return {string} a human readable name */
+  get name(){ return 'Filter' }
 }

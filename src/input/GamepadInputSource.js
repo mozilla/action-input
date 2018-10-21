@@ -29,6 +29,9 @@ export default class GamepadInputSource extends InputSource {
     this._gamepads = null;
   }
 
+  /** @return {string} a human readable name */
+  get name(){ return 'GamepadInputSource' }
+
   queryInputPath(partialPath) {
     if (this._gamepads === null) return null;
 

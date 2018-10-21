@@ -11,6 +11,9 @@ export default class ClickFilter extends Filter {
     this._queryInputPath = queryInputPath;
   }
 
+  /** @return {string} a human readable name */
+  get name(){ return 'ClickFilter' }
+
   /**
    * @param {string} inputPath
    * @param inputValue
