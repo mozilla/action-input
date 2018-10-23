@@ -15,7 +15,7 @@ import InputSource from "./InputSource.js";
  *  "/0/angular-velocity"
  *  "/0/angular-acceleration"
  *
- *  Buttons and axed are referenced by index
+ *  Buttons and axes are referenced by index
  *  "/0/button/count" The number of available buttons
  *  "/0/button/0/pressed"
  *  "/0/button/0/touched"
