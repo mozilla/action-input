@@ -47,6 +47,29 @@ export default class ActionManager {
     this._deactivations = new Map();
   }
 
+  /**
+  prettyPrint sends handy set of debugging info to the console log
+  */
+  prettyPrint(){
+    console.log('ActionManager')
+
+    console.log('\tSources:')
+    for(const [path, source] of this._inputSources){
+      console.log('\t\t' + path, source.name)
+    }
+
+    console.log('\tFilters:')
+    for(const [path, filter] of this._filters){
+      console.log('\t\t' + path, filter.name)
+    }
+
+    console.log('\tActionMaps:')
+    for(const [path, actionMap] of this._actionMaps){
+      console.log('\t\t' + path, this._activeActionMaps.has(path) ? '[active]' : '[inactive]')
+      actionMap.prettyPrint(3)
+    }
+  }
+
   /*
   @param inputPath {string} a full semantic path for an input, like '/input/keyboard/key/32'
   @return [inputValue, inputSource]

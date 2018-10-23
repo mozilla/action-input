@@ -15,7 +15,7 @@ import InputSource from "./InputSource.js";
  *  "/0/angular-velocity"
  *  "/0/angular-acceleration"
  *
- *  Buttons and axed are referenced by index
+ *  Buttons and axes are referenced by index
  *  "/0/button/count" The number of available buttons
  *  "/0/button/0/pressed"
  *  "/0/button/0/touched"
@@ -28,6 +28,9 @@ export default class GamepadInputSource extends InputSource {
     super();
     this._gamepads = null;
   }
+
+  /** @return {string} a human readable name */
+  get name(){ return 'GamepadInputSource' }
 
   queryInputPath(partialPath) {
     if (this._gamepads === null) return null;

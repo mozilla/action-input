@@ -17,6 +17,9 @@ export default class TouchInputSource extends InputSource {
     targetElement.addEventListener("touchmove", this._handleTouchEvent);
   }
 
+  /** @return {string} a human readable name */
+  get name(){ return 'TouchInputSource' }
+
   /**
   @todo do something nicer than just returning Touch objects
 
