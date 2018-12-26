@@ -46,10 +46,16 @@ export default class MouseInputSource extends InputSource {
   @param partialPath {string} the relative semantic path for an input
   @return the value of the the input, or null if the path does not exist
   */
-  queryInputPath(partialPath) {
-    if (partialPath === "/target") return this._target;
+  queryInputPath(partialPath, result) {
+    if(result === null) result = [false, null];
 
-    if (partialPath.startsWith("/0/") === false && partialPath.startsWith("/*/") === false) return null;
+    if (partialPath === "/target") {
+      result[0] = !!this._target;
+      result[1] = this._target;
+      return result
+    }
+
+    if (partialPath.startsWith("/0/") === false && partialPath.startsWith("/*/") === false) return result;
 
     const path = partialPath.substring(3);
 
@@ -57,36 +63,59 @@ export default class MouseInputSource extends InputSource {
       const specifier = path.substring(7);
       switch (specifier) {
         case "primary":
-          return !!this._buttons[0];
+          result[0] = !!this._buttons[0];
+          return result;
         case "secondary":
-          return !!this._buttons[1];
+          result[0] = !!this._buttons[1];
+          return result;
         case "tertiary":
-          return !!this._buttons[2];
+          result[0] = !!this._buttons[2];
+          return result;
         default:
           const index = Number.parseInt(path.substring(7), 10);
-          if (Number.isNaN(index)) return null;
-          return !!this._buttons[index];
+          if (Number.isNaN(index)) return result;
+          result[0] = !!this._buttons[index];
+          return result
       }
     }
 
     switch (path) {
       case "normalized-position":
-        return this._normalizedX === null ? null : [this._normalizedX, this._normalizedY];
+        result[1] = this._normalizedX === null ? null : [this._normalizedX, this._normalizedY];
+        result[0] = result[1] !== null
+        return result
+
       case "client-position":
-        return this._clientX === null ? null : [this._clientX, this._clientY];
+        result[1] = this._clientX === null ? null : [this._clientX, this._clientY];
+        result[0] = result[1] !== null
+        return result
+
       case "offset-position":
-        return this._offsetX === null ? null : [this._offsetX, this._offsetY];
+        result[1] = this._offsetX === null ? null : [this._offsetX, this._offsetY];
+        result[0] = result[1] !== null
+        return result
+
       case "screen-position":
-        return this._screenX === null ? null : [this._screenX, this._screenY];
+        result[1] = this._screenX === null ? null : [this._screenX, this._screenY];
+        result[0] = result[1] !== null
+        return result
+
       case "movement-position":
-        return this._movementX === null ? null : [this._movementX, this._movementY];
+        result[1] = this._movementX === null ? null : [this._movementX, this._movementY];
+        result[0] = result[1] !== null
+        return result
+
       case "app-position":
-        return this._appX === null ? null : [this._appX, this._appY];
+        result[1] = this._appX === null ? null : [this._appX, this._appY];
+        result[0] = result[1] !== null
+        return result
     }
+
+    return result
   }
 
   _updatePosition(event) {
-    this._target = event.target;
+    this._target = event.target || null;
     this._normalizedX = event.clientX / document.documentElement.offsetWidth * 2 - 1;
     this._normalizedY = -(event.clientY / document.documentElement.offsetHeight) * 2 + 1;
 

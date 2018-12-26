@@ -29,8 +29,12 @@ export default class KeyboardInputSource extends InputSource {
   @param partialPath {string} the relative semantic path for an input
   @return the value of the the input, or null if the path does not exist
   */
-  queryInputPath(partialPath) {
-    if (partialPath.startsWith("/0/key/") === false && partialPath.startsWith("/*/key/") === false) return null;
+  queryInputPath(partialPath, result=null) {
+    if(result === null) result = [false, null];
+
+    if (partialPath.startsWith("/0/key/") === false && partialPath.startsWith("/*/key/") === false) {
+      return result;
+    }
 
     const lastToken = partialPath.substring(7);
 
@@ -39,11 +43,13 @@ export default class KeyboardInputSource extends InputSource {
       for (let value of this._activeKeyCodes.values()) {
         values[values.length] = value;
       }
-      return values;
+      result[0] = values.length > 0
+      result[1] = values
     }
 
     let keycode = Number.parseInt(lastToken, 10);
-    if (Number.isNaN(keycode)) return null;
-    return this._activeKeyCodes.has(keycode);
+    if (Number.isNaN(keycode)) return result;
+    result[0] = this._activeKeyCodes.has(keycode);
+    return result
   }
 }

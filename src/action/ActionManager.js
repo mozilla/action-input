@@ -5,6 +5,8 @@ import ActionMap from "./ActionMap.js";
  */
 export default class ActionManager {
   constructor() {
+    this._handleMapUpdate =  this._handleMapUpdate.bind(this)
+
     this.queryInputPath = this.queryInputPath.bind(this);
     /**
      * input semantic path (with wildcards) -> action listener {function}
@@ -17,6 +19,7 @@ export default class ActionManager {
      * @type {Map<string, InputSource>}
      */
     this._inputSources = new Map();
+    this._inputSourceList = new Array();
 
     /**
      * full semantic path -> {@link Filter}
@@ -35,16 +38,25 @@ export default class ActionManager {
      * @type {Map<string, ActionMap>}
      */
     this._activeActionMaps = new Map();
+    this._activeActionMapList = new Array();
 
     /**
      * actionPath -> { action parameters }
      * @type {Map<string, Object>}
      */
-    this._activeActionInfos = new Map();
+    this._actionInfos = new Map();
 
     // Used during updates
-    this._activations = new Map();
-    this._deactivations = new Map();
+    this._activationPaths = new Array();
+    this._activationValues = new Array();
+    this._activationParameters = new Array();
+    this._activationFilterParameters = new Array();
+    this._activationInputSources = new Array()
+    this._deactivationPaths = new Array();
+    this._deactivationValues = new Array();
+    this._deactivationParameters = new Array();
+    this._deactivationFilterParameters = new Array();
+    this._deactivationInputSources = new Array();
   }
 
   /**
@@ -70,18 +82,30 @@ export default class ActionManager {
     }
   }
 
-  /*
-  @param inputPath {string} a full semantic path for an input, like '/input/keyboard/key/32'
-  @return [inputValue, inputSource]
+  /**
+  @param {string} inputPath - a full semantic path for an input, like '/input/keyboard/key/32'
+  @param [result] - if not null, the two element array in which to return the results
+  @return [inputActive, inputValue, inputSource]
   */
-  queryInputPath(inputPath) {
-    for (let inputSourceInfo of this.inputSources) {
+  queryInputPath(inputPath, result=null) {
+    if(result === null) result = new Array(3)
+    let inputSourceInfo = null
+    for (let i=0; i < this._inputSourceList.length; i++) {
+      inputSourceInfo = this._inputSourceList[i]
       if (inputPath.startsWith(inputSourceInfo[0]) === false) {
         continue;
       }
-      return [inputSourceInfo[1].queryInputPath(inputPath.substring(inputSourceInfo[0].length)), inputSourceInfo[1]];
+
+      inputSourceInfo[1].queryInputPath(inputPath.substring(inputSourceInfo[0].length), _queryInputResult);
+      result[0] = _queryInputResult[0];
+      result[1] = _queryInputResult[1];
+      result[2] = inputSourceInfo[2];
+      return result;
     }
-    return [null, null];
+    result[0] = false
+    result[1] = null
+    result[2] = null
+    return result;
   }
 
   /**
@@ -90,41 +114,114 @@ export default class ActionManager {
    */
   poll() {
     // Poll inputs
-    this._inputSources.forEach((inputSource, inputPath) => {
-      inputSource.poll();
-    });
-
-    this._activations.clear();
-    this._deactivations.clear();
-
-    this._activeActionMaps.forEach((actionMap, name) => {
-      actionMap.update(this.queryInputPath, (actionPath, active, actionParameters, inputSource) => {
-        if (active) {
-          // Accept the first activation
-          if (this._activations.has(actionPath)) return;
-          this._activations.set(actionPath, [actionPath, actionParameters, inputSource]);
-        } else {
-          this._deactivations.set(actionPath, [actionPath, actionParameters, inputSource]);
-        }
-      });
-    });
-
-    for (const [actionPath, actionParameters, inputSource] of this._activations.values()) {
-      this._deactivations.delete(actionPath); // If we activate it in this update, don't deactivate it
-      if (this._activeActionInfos.has(actionPath)) {
-        this._activeActionInfos.set(actionPath, actionParameters);
-        continue; // Changing an already existing action does not trigger an event
-      }
-      this._activeActionInfos.set(actionPath, actionParameters);
-      this._notifyListeners(actionPath, true, actionParameters, inputSource);
+    for(let i=0; i < this._inputSourceList.length; i++){
+      this._inputSourceList[i][1].poll()
     }
-    for (const [actionPath, actionParameters, inputSource] of this._deactivations.values()) {
-      if (this._activeActionInfos.has(actionPath) === false) {
-        continue; // Action is not active, so no new event
-      }
-      this._activeActionInfos.delete(actionPath);
-      this._notifyListeners(actionPath, false, actionParameters, inputSource);
+
+    for(let i=0; i < this._activeActionMapList.length; i++){
+      this._activeActionMapList[i][1].update(this.queryInputPath, this._handleMapUpdate)
     }
+
+    for (let i=0; i < this._activationPaths.length; i++) {
+      _actionInfo = this._getOrCreateActionInfo(this._activationPaths[i])
+      _shouldNotify = _actionInfo.active === false
+      _actionInfo.active = true
+      _actionInfo.value = this._activationValues[i]
+      _actionInfo.actionParameters = this._activationParameters[i]
+      _actionInfo.filterParameters = this._activationFilterParameters[i]
+      _actionInfo.inputSource = this._activationInputSources[i]
+      if(_shouldNotify){
+        this._notifyListeners(
+          this._activationPaths[i],
+          true,
+          _actionInfo.value,
+          _actionInfo.actionParameters,
+          _actionInfo.filterParameters,
+          _actionInfo.inputSource
+        );
+      }
+
+      _index = this._deactivationPaths.indexOf(this._activationPaths[i]);
+      if(_index !== -1){
+        this._deactivationPaths.splice(_index, 1);
+        this._deactivationValues.splice(_index, 1);
+        this._deactivationParameters.splice(_index, 1);
+        this._deactivationFilterParameters.splice(_index, 1);
+        this._deactivationInputSources.splice(_index, 1);
+      }
+    }
+
+    for (let i=0; i < this._deactivationPaths.length; i++) {
+      _actionPath = this._deactivationPaths[i];
+
+      _actionInfo = this._getOrCreateActionInfo(_actionPath)
+      _shouldNotify = _actionInfo.active
+      _actionInfo.active = false
+      _actionInfo.value = this._deactivationValues[i]
+      _actionInfo.actionParameters = this._deactivationParameters[i]
+      _actionInfo.filterParameters = this._deactivationFilterParameters
+      _actionInfo.inputSource = this._deactivationInputSources[i]
+
+      if(_shouldNotify){
+        this._notifyListeners(
+          _actionPath,
+          false,
+          _actionInfo.value,
+          _actionInfo.actionParameters,
+          _actionInfo.filterParameters,
+          _actionInfo.inputSource
+        );
+      }
+    }
+
+    this._clearMapUpdates()
+  }
+
+  _getOrCreateActionInfo(actionPath){
+    let actionInfo = this._actionInfos.get(actionPath)
+    if(actionInfo) return actionInfo
+    actionInfo = {
+      active: false,
+      value: null,
+      actionParameters: null,
+      filterParameters: null,
+      inputSource: null
+    }
+    this._actionInfos.set(actionPath, actionInfo)
+    return actionInfo
+  }
+
+  _handleMapUpdate(actionPath, active, actionValue, actionParameters, filterParameters, inputSource){
+    if (active) {
+      // Accept only the first activation for a path
+      if (this._activationPaths.indexOf(actionPath) !== -1) return;
+      this._activationPaths.push(actionPath);
+      this._activationValues.push(actionValue);
+      this._activationParameters.push(actionParameters);
+      this._activationFilterParameters.push(filterParameters);
+      this._activationInputSources.push(inputSource);
+    } else {
+      if (this._deactivationPaths.indexOf(actionPath) !== -1) return;
+      this._deactivationPaths.push(actionPath);
+      this._deactivationValues.push(actionValue);
+      this._deactivationParameters.push(actionParameters)
+      this._deactivationFilterParameters.push(filterParameters);
+      this._deactivationInputSources.push(inputSource)
+    }
+  }
+
+  _clearMapUpdates(){
+    this._activationPaths.splice(0, this._activationPaths.length);
+    this._activationValues.splice(0, this._activationValues.length);
+    this._activationParameters.splice(0, this._activationParameters.length);
+    this._activationFilterParameters.splice(0, this._activationFilterParameters.length);
+    this._activationInputSources.splice(0, this._activationInputSources.length);
+
+    this._deactivationPaths.splice(0, this._deactivationPaths.length);
+    this._deactivationValues.splice(0, this._deactivationValues.length);
+    this._deactivationParameters.splice(0, this._deactivationParameters.length);
+    this._deactivationFilterParameters.splice(0, this._deactivationFilterParameters.length);
+    this._deactivationInputSources.splice(0, this._deactivationInputSources.length);
   }
 
   /**
@@ -146,17 +243,13 @@ export default class ActionManager {
     this._filters.delete(`/filter/${semanticName}`);
   }
 
-  /** @type {Iterator} over [{string}, {@link InputSource}] items */
-  get inputSources() {
-    return this._inputSources.entries();
-  }
-
   /**
    * @param {string} inputPathName a single element in the semantic path for the input source, like 'keyboard' for a KeyboardInputSource
    * @param {InputSource} inputSource
    */
   addInputSource(inputPathName, inputSource) {
     this._inputSources.set(`/input/${inputPathName}`, inputSource);
+    this._inputSourceList.push([`/input/${inputPathName}`, inputSource])
   }
 
   /** @type {Iterator} over [mapName {string}, {@link ActionMap}] items */
@@ -196,7 +289,9 @@ export default class ActionManager {
         console.error("Tried to activate unknown action map:", name);
         continue;
       }
-      this._activeActionMaps.set(name, this._actionMaps.get(name));
+      if(this._activeActionMaps.has(name)) continue;
+      this._activeActionMapList.push([name, this._actionMaps.get(name)]);
+      this._activeActionMaps.set(name, this._activeActionMapList[this._activeActionMapList.length - 1][1]);
     }
   }
 
@@ -207,7 +302,14 @@ export default class ActionManager {
    */
   deactivateActionMaps(...names) {
     for (let name of names) {
+      if(this._activeActionMaps.has(name) === false) continue
       this._activeActionMaps.delete(name);
+      for(let i=0; i < this._activeActionMapList.length; i++){
+        if(this._activeActionMapList[i][0] === name){
+          this._activeActionMapList.splice(i, 1)
+          return
+        }
+      }
     }
   }
 
@@ -216,8 +318,9 @@ export default class ActionManager {
    * @param {...string} action-map names
    */
   switchToActionMaps(...names) {
-    this._activeActionInfos.clear();
+    this._actionInfos.clear();
     this._activeActionMaps.clear();
+    this._activeActionMapList.splice(0, this._activeActionMapList.length);
     this.activateActionMaps(...names);
   }
 
@@ -253,11 +356,11 @@ export default class ActionManager {
     return listenerSet.delete(listener);
   }
 
-  _notifyListeners(actionPath, active, actionParameters, inputSource) {
+  _notifyListeners(actionPath, active, value, actionParameters, filterParameters, inputSource) {
     this._actionListeners.forEach((listenerSet, listenerPath) => {
       if (this._pathsMatch(actionPath, listenerPath) === false) return;
       listenerSet.forEach(listener => {
-        listener(actionPath, active, actionParameters, inputSource);
+        listener(actionPath, active, value, actionParameters, filterParameters, inputSource);
       });
     });
   }
@@ -273,19 +376,16 @@ export default class ActionManager {
    * @return {bool} true if the {@link Action} at the actionPath is currently active
    */
   actionIsActive(actionPath) {
-    return this._activeActionInfos.has(actionPath);
-  }
-
-  /**
-   * @param {string} actionPath a full semantic path to an action, like '/action/jump'
-   * @returns {
-   *   action: {@link Action},
-   *   active: {bool},
-   *   sources: [{@link Device}, ...],
-   *   action specific params...
-   * }
-   */
-  getActionState(actionPath) {
-    return this._activeActionInfos.get(actionPath) || null;
+    return this._actionInfos.has(actionPath) && this._actionInfos.get(actionPath).active;
   }
 }
+
+const _queryInputResult = new Array(2)
+let _index = 0
+let _shouldNotify = false
+let _actionInfo = null
+let _actionPath = null
+let _actionValue = null
+let _actionParameters = null
+let _filterParameters = null
+let _inputSource = null

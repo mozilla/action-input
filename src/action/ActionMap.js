@@ -26,6 +26,8 @@ export default class ActionMap {
      * @type {Map<string, Set<Object>>}
      */
     this._bindings = new Map();
+    this._bindingsList = new Array();
+
     if (url !== null) {
       this.loadURL(url).catch((...params) => {
         console.error("Error loading ActionMap", ...params);
@@ -94,10 +96,11 @@ export default class ActionMap {
   bind(inputPath, actionPath, actionParameters = null, filterPath = null, filterParameters = null) {
     let pathInfos = this._bindings.get(inputPath);
     if (typeof pathInfos === "undefined") {
-      pathInfos = new Set();
+      pathInfos = new Array();
       this._bindings.set(inputPath, pathInfos);
+      this._bindingsList.push([inputPath, pathInfos])
     }
-    pathInfos.add({
+    pathInfos.push({
       action: actionPath,
       actionParameters: actionParameters,
       filter: filterPath,
@@ -112,33 +115,50 @@ export default class ActionMap {
    * If there are no activations for an action, then the ActionManager will accept the first deactivation for an action.
    */
   update(queryInputPath, updateCallback) {
-    for (const [inputPath, bindingInfos] of this._bindings.entries()) {
-      if (bindingInfos.size === 0) continue;
-      const [inputValue, inputSource] = queryInputPath(inputPath);
-      bindingInfos.forEach(info => {
-        if (info.filter === null) {
-          const active = !!inputValue;
-          updateCallback(info.action, active, info.actionParameters, inputSource);
-          return;
+    for(let bi=0; bi < this._bindingsList.length; bi++){
+      _inputPath = this._bindingsList[bi][0]
+      _bindingInfos = this._bindingsList[bi][1]
+      if (_bindingInfos.length === 0) continue;
+      queryInputPath(_inputPath, _queryResult);
+      _inputActive = _queryResult[0];
+      _inputValue = _queryResult[1];
+      _inputSource = _queryResult[2];
+      for(let i=0; i < _bindingInfos.length; i++){
+        _info = _bindingInfos[i]
+
+        if (_info.filter !== null) {
+          _filter = this._filters.get(_info.filter);
+          if (typeof _filter === "undefined") {
+            console.error("Unknown filter", _info.filter);
+            continue;
+          }
+
+          _filter.filter(
+            _inputPath,
+            _inputActive,
+            _inputValue,
+            _info.filter,
+            _info.filterParameters,
+            _filterResults
+          );
+          _inputActive = _filterResults[0]
+          _inputValue = _filterResults[1]
         }
-        const filter = this._filters.get(info.filter);
-        if (typeof filter === "undefined") {
-          console.error("Unknown filter", info.filter);
-          return;
-        }
-        const [filteredValue, filteredActionParameters] = filter.filter(
-          inputPath,
-          inputValue,
-          info.filter,
-          info.filterParameters
-        );
-        const active = !!filteredValue;
-        const actionParams =
-          filteredActionParameters === null
-            ? info.actionParameters
-            : Object.assign({ value: filteredValue }, info.actionParameters, filteredActionParameters);
-        updateCallback(info.action, active, actionParams, inputSource);
-      });
+
+        updateCallback(_info.action, _inputActive, _inputValue, _info.actionParameters, _info.filterParameters, _inputSource);
+      }
     }
   }
 }
+
+let _key = null
+let _queryResult = new Array(3);
+let _filterResults = new Array(2);
+let _filter = null;
+let _info = null;
+let _actionParams = null
+let _bindingInfos = null
+let _inputPath = null
+let _inputActive = false
+let _inputValue = null
+let _inputSource = null

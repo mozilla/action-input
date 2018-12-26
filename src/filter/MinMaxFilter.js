@@ -15,23 +15,55 @@ let MinMaxFilter = class extends Filter {
    *
    * @return {Array} [value, actionParameters]
    */
-  filter(inputPath, inputValue, filterPath, filterParameters) {
+  filter(inputPath, inputActive, inputValue, filterPath, filterParameters, results=null) {
+    if(results === null) results = new Array(2);
+    if(inputActive === false){
+      results[0] = false
+      results[1] = null
+      return results
+    }
     const input = Number.parseFloat(inputValue, 10);
-    if (Number.isNaN(input)) return [null, null];
+    if (Number.isNaN(input)) {
+      results[0] = false
+      results[1] = null
+      return results
+    }
     if ("minimum" in filterParameters) {
-      if (input < filterParameters["minimum"]) return [null, null];
+      if (input < filterParameters["minimum"]) {
+        results[0] = false
+        results[1] = null
+        return results
+      }
     } else {
-      if (input < MinMaxFilter.DefaultMinimum) return [null, null];
+      if (input < MinMaxFilter.DefaultMinimum) {
+        results[0] = false
+        results[1] = null
+        return results
+      }
     }
     if ("maximum" in filterParameters) {
-      if (input > filterParameters["maximum"]) return [null, null];
+      if (input > filterParameters["maximum"]){
+        results[0] = false
+        results[1] = null
+        return results
+      }
     } else {
-      if (input > MinMaxFilter.DefaultMaximum) return [null, null];
+      if (input > MinMaxFilter.DefaultMaximum){
+        results[0] = false
+        results[1] = null
+        return results
+      }
     }
     if ("minimum-absolute" in filterParameters) {
-      if (Math.abs(input) < filterParameters["minimum-absolute"]) return [null, null];
+      if (Math.abs(input) < filterParameters["minimum-absolute"]) {
+        results[0] = false
+        results[1] = null
+        return results
+      }
     }
-    return [input, {}];
+    results[0] = true;
+    results[1] = input;
+    return results;
   }
 
   /** @return {string} a human readable name */

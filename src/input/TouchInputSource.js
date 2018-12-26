@@ -26,28 +26,39 @@ export default class TouchInputSource extends InputSource {
   @param partialPath {string} the relative semantic path for an input
   @return the value of the the input, or null if the path does not exist
   */
-  queryInputPath(partialPath) {
+  queryInputPath(partialPath, result=null) {
+    if(result === null) result = [false, null];
+
     if (partialPath.startsWith("/touches/")) {
       const index = Number.parseInt(partialPath.substring(8));
-      if (Number.isNaN(index)) return null;
-      return this.item(index);
+      if (Number.isNaN(index)) return result;
+      result[1] = this.item(index);
+      result[0] = result[1] !== null
+      return result
     }
 
     if (partialPath.startsWith("/normalized-position/")) {
       const index = Number.parseInt(partialPath.substring(21));
-      if (Number.isNaN(index)) return null;
-      return this.normalizedPosition(index);
+      if (Number.isNaN(index)) return result;
+      result[1] = this.normalizedPosition(index);
+      result[0] = result[1] !== null
+      return result
     }
 
     switch (partialPath) {
       case "/count":
-        return this._touches === null ? 0 : this._touches.length;
+        result[1] = this._touches === null ? 0 : this._touches.length;
+        result[0] = result[1] > 0;
+        return result;
       case "/target":
-        return this._target;
+        result[1] = this._target;
+        result[0] = result[1] !== null;
+        return result;
       case "/touches":
-        return this.touches;
+        result[1] = this.touches;
+        result[0] = result[1].length > 0
       default:
-        return null;
+        return result;
     }
   }
 

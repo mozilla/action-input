@@ -16,8 +16,11 @@ export default class ReverseActiveFilter extends Filter {
    *
    * @return {Array} [value, actionParameters]
    */
-  filter(inputPath, inputValue, filterPath, filterParameters) {
-    return [!inputValue, null];
+  filter(inputPath, inputActive, inputValue, filterPath, filterParameters, results=null) {
+    if (results === null) results = new Array(2);
+    results[0] = !inputActive;
+    results[1] = inputValue;
+    return results;
   }
 
   /** @return {string} a human readable name */

@@ -1,4 +1,5 @@
 import Filter from "./Filter.js";
+import { split } from '../MemoryUtils.js';
 
 /**
  * ClickFilter activates the action if input is truthy.
@@ -22,22 +23,30 @@ export default class ClickFilter extends Filter {
    *
    * @return {Array} [value, actionParameters]
    */
-  filter(inputPath, inputValue, filterPath, filterParameters) {
-    const target = this._getTarget(inputPath);
-    return [!!inputValue, { targetComponent: target }];
+  filter(inputPath, inputActive, inputValue, filterPath, filterParameters, results=null) {
+    if(results === null) results = new Array(2);
+    results[0] = inputActive
+    results[1] = this._getTarget(inputPath)
+    return results;
   }
 
   _getTarget(inputPath) {
     // Assumes that /1/2/target is the target where 1 and 2 are the first two tokens in the path
-    let tokens = inputPath.split("/");
-    if (tokens.length < 3) return null;
-    const targetPath = `/${tokens[1]}/${tokens[2]}/target`;
-    let targetEl = this._queryInputPath(targetPath)[0];
-    if (!targetEl) return null;
-    while (true) {
-      if (targetEl.component) return targetEl.component;
-      if (!targetEl.parentElement) return null;
-      targetEl = targetEl.parentElement;
+    split(inputPath, "/", _tokens);
+    if (_tokens.length < 3) return null;
+    _targetPath = `/${_tokens[1]}/${_tokens[2]}/target`;
+    this._queryInputPath(_targetPath, _queryResult);
+    if(_queryResult[0] === false) return null
+    let obj = _queryResult[1]
+    while(obj){
+      if(obj.component) return obj.component
+      obj = obj.parentNode
     }
+    return null
   }
 }
+
+let _targetPath = null
+let _tokens = []
+let _targetEl = null
+let _queryResult = new Array(2);

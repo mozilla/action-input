@@ -10,9 +10,10 @@ export default class InputSource {
 
   /**
   @param partialPath {string} the relative semantic path for an input
-  @return the value of the the input, or null if the path does not exist
+  @param {Array} [result] a two element array [active, value]
+  @return {Array[active {boolean}, value]}
   */
-  queryInputPath(partialPath) {
+  queryInputPath(partialPath, result=null) {
     return null;
   }
 

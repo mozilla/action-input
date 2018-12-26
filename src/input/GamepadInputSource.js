@@ -1,4 +1,5 @@
 import InputSource from "./InputSource.js";
+import { split } from '../MemoryUtils.js';
 
 /**
  *  GamepadInputSource watches the gamepad API and tracks the state of gamepads
@@ -26,92 +27,175 @@ import InputSource from "./InputSource.js";
 export default class GamepadInputSource extends InputSource {
   constructor() {
     super();
-    this._gamepads = null;
+    this._gamepads = navigator.getGamepads();
+    window.addEventListener('gamepadconnected', () => {
+      this._gamepads = navigator.getGamepads();
+    })
+    window.addEventListener('gamepaddisconnected', () => {
+      this._gamepads = navigator.getGamepads();
+    })
   }
 
   /** @return {string} a human readable name */
   get name(){ return 'GamepadInputSource' }
 
-  queryInputPath(partialPath) {
-    if (this._gamepads === null) return null;
+  queryInputPath(partialPath, result=null) {
+    if(result === null) result = new Array(2);
 
-    let tokens = partialPath.substring(1).split("/");
-    if (tokens.length < 2 || tokens.length > 4) return null;
+    if (this._gamepads === null){
+      result[0] = false
+      result[1] = null
+      return result
+    }
+
+    split(partialPath.substring(1), "/", _tokens);
+    if (_tokens.length < 2 || _tokens.length > 4){
+      result[0] = false
+      result[1] = null
+      return result
+    }
 
     // Find the gamepad by index or by hand
     var gamepad = null;
-    if (tokens[0] === "left" || tokens[0] === "right") {
+    if (_tokens[0] === "left" || _tokens[0] === "right") {
       for (let gp of this._gamepads) {
         if (gp === null) continue;
-        if (gp.hand === tokens[0]) {
+        if (gp.hand === _tokens[0]) {
           gamepad = gp;
           break;
         }
       }
-      if (gamepad === null) return null;
+      if (gamepad === null){
+        result[0] = false
+        result[1] = null
+        return result
+      }
     } else {
-      const index = Number.parseInt(tokens[0], 10);
-      if (Number.isNaN(index)) return null;
-      if (index >= this._gamepads.length) return null;
-      if (!this._gamepads[index]) return null;
+      const index = Number.parseInt(_tokens[0], 10);
+      if (Number.isNaN(index) || index >= this._gamepads.length || !this._gamepads[index]){
+        result[0] = false
+        result[1] = null
+        return result
+      }
       gamepad = this._gamepads[index];
     }
 
-    if (tokens.length === 2) {
-      switch (tokens[1]) {
+    if (_tokens.length === 2) {
+      result[0] = true;
+      result[1] = null;
+      switch (_tokens[1]) {
         case "hand":
-          return gamepad.hand || "";
+          result[1] = gamepad.hand || "";
+          return result
         case "connected":
-          return gamepad.connected === true;
+          result[0] = gamepad.connected === true;
+          return result
         case "has-orientation":
-          return !!gamepad.pose && gamepad.pose.hasOrientation === true;
+          result[0] = !!gamepad.pose && gamepad.pose.hasOrientation === true;
+          return result
         case "has-position":
-          return gamepad.pose && gamepad.pose.hasPosition === true;
+          result[0] = gamepad.pose && gamepad.pose.hasPosition === true;
+          return result
         case "position":
-          return (gamepad.pose && gamepad.pose.position) || null;
+          if(gamepad.pose){
+            result[1] = gamepad.pose.position || null
+            result[0] = result[1] !== null
+          } else {
+            result[0] = false
+          }
+          return result
         case "orientation":
-          return (gamepad.pose && gamepad.pose.orientation) || null;
+          if(gamepad.pose){
+            result[1] = gamepad.pose.orientation || null
+            result[0] = result[1] !== null
+          } else {
+            result[0] = false
+          }
+          return result
         case "linear-velocity":
-          return (gamepad.pose && gamepad.pose.linearVelocity) || null;
+          if(gamepad.pose){
+            result[1] = gamepad.pose.linearVelocity || null
+            result[0] = result[1] !== null
+          } else {
+            result[0] = false
+          }
+          return result
         case "angular-velocity":
-          return (gamepad.pose && gamepad.pose.angularVelocity) || null;
+          if(gamepad.pose){
+            result[1] = gamepad.pose.angularVelocity || null
+          } else {
+            result[0] = false
+          }
+          return result
         default:
-          return null;
+          result[0] = false;
+          result[1] = null
+          return result
       }
-    }
-
-    if (tokens.length === 3) {
-      switch (tokens[1]) {
+    } else if (_tokens.length === 3) {
+      result[0] = true;
+      result[1] = null;
+      switch (_tokens[1]) {
         case "button":
-          if (tokens[2] === "count") return gamepad.buttons.length;
-          const buttonIndex = Number.parseInt(tokens[2]);
-          if (Number.isNaN(buttonIndex) || buttonIndex >= gamepad.buttons.length) return null;
-          return gamepad.buttons[buttonIndex].value;
+          if (_tokens[2] === "count") {
+            result[1] = gamepad.buttons.length;
+            return result
+          }
+          const buttonIndex = Number.parseInt(_tokens[2]);
+          if (Number.isNaN(buttonIndex) || buttonIndex >= gamepad.buttons.length) {
+            result[0] = false
+            return result
+          }
+          result[0] = gamepad.buttons[buttonIndex].value !== 0;
+          result[1] = gamepad.buttons[buttonIndex].value;
+          return result
         case "axis":
-          if (tokens[2] === "count") return gamepad.axes.length;
-          const axisIndex = Number.parseInt(tokens[2]);
-          if (Number.isNaN(axisIndex) || axisIndex >= gamepad.axes.length) return null;
-          return gamepad.axes[axisIndex];
+          if (_tokens[2] === "count") {
+            result[1] = gamepad.axes.length;
+            return result;
+          }
+          const axisIndex = Number.parseInt(_tokens[2]);
+          if (Number.isNaN(axisIndex) || axisIndex >= gamepad.axes.length) {
+            result[0] = false
+            return result
+          }
+          result[0] = gamepad.axes[axisIndex] !== 0;
+          result[1] = gamepad.axes[axisIndex];
+          return result;
         default:
-          return null;
+          result[0] = false
+          return result;
       }
     }
 
-    if (tokens[1] !== "button") return null;
+    if (_tokens[1] !== "button") {
+      result[0] = false;
+      result[1] = null;
+      return result
+    }
 
-    // Now token.length is assumed to === 4 with tokens[2] being a sub-index for buttons
+    // Now token.length is assumed to === 4 with _tokens[2] being a sub-index for buttons
 
-    const buttonIndex = Number.parseInt(tokens[2], 10);
-    if (Number.isNaN(buttonIndex) || buttonIndex >= gamepad.buttons.length) return null;
-    switch (tokens[3]) {
+    result[0] = false;
+    result[1] = null;
+
+    const buttonIndex = Number.parseInt(_tokens[2], 10);
+    if (Number.isNaN(buttonIndex) || buttonIndex >= gamepad.buttons.length){
+      return result;
+    }
+    switch (_tokens[3]) {
       case "pressed":
-        return gamepad.buttons[buttonIndex].pressed === true;
+        result[0] = gamepad.buttons[buttonIndex].pressed === true
+        return result;
       case "touched":
-        return gamepad.buttons[buttonIndex].touched === true;
+        result[0] = gamepad.buttons[buttonIndex].touched === true
+        return result;
       case "value":
-        return gamepad.buttons[buttonIndex].value || 0;
+        result[0] = gamepad.buttons[buttonIndex].value !== 0
+        result[1] = gamepad.buttons[buttonIndex].value
+        return result;
       default:
-        return null;
+        return result;
     }
   }
 
@@ -119,3 +203,5 @@ export default class GamepadInputSource extends InputSource {
     this._gamepads = navigator.getGamepads();
   }
 }
+
+const _tokens = []
