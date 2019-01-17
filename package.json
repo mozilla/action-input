@@ -1,5 +1,5 @@
 {
-  "name": "potassium-action-input",
+  "name": "action-input",
   "version": "1.0.0",
   "description": "A framework-agnostic input library.",
   "main": "",
@@ -15,11 +15,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/potassiumes/action-input.git"
+    "url": "git+https://github.com/PotassiumES/action-input.git"
   },
   "author": "Mozilla",
   "bugs": {
-    "url": "https://github.com/potassiumes/action-input/issues"
+    "url": "https://github.com/PotassiumES/action-input/issues"
   },
   "prettier": {
     "printWidth": 120
