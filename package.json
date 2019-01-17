@@ -1,6 +1,6 @@
 {
-  "name": "action-input",
-  "version": "0.1.0",
+  "name": "potassium-action-input",
+  "version": "1.0.0",
   "description": "A framework-agnostic input library.",
   "main": "",
   "license": "MPL-2.0",
@@ -15,11 +15,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mozilla/action-input.git"
+    "url": "git+https://github.com/potassiumes/action-input.git"
   },
   "author": "Mozilla",
   "bugs": {
-    "url": "https://github.com/mozilla/action-input/issues"
+    "url": "https://github.com/potassiumes/action-input/issues"
   },
   "prettier": {
     "printWidth": 120
